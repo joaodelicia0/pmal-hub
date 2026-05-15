@@ -2,828 +2,753 @@
 <html lang="pt-BR">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>PMAL 2026 — Super Hub de Aprovação</title>
-<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-<style>
-:root {
-  --bg: #0a0c10;
-  --surface: #111318;
-  --surface2: #181b22;
-  --border: #1f2330;
-  --accent: #3b82f6;
-  --accent2: #10b981;
-  --accent3: #f59e0b;
-  --accent4: #ec4899;
-  --text: #e2e8f0;
-  --muted: #64748b;
-  --danger: #ef4444;
-}
-* { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
-body {
-  font-family: 'DM Sans', sans-serif;
-  background: var(--bg);
-  color: var(--text);
-  min-height: 100vh;
-  padding-bottom: 80px;
-  background-image: radial-gradient(ellipse at 20% 0%, rgba(59,130,246,.08) 0%, transparent 60%), radial-gradient(ellipse at 80% 100%, rgba(16,185,129,.06) 0%, transparent 60%);
-}
-h1,h2,h3,h4 { font-family: 'Syne', sans-serif; }
-
-/* ── NAV ── */
-.nav {
-  background: rgba(10,12,16,.92);
-  backdrop-filter: blur(20px);
-  border-bottom: 1px solid var(--border);
-  position: sticky; top: 0; z-index: 100;
-}
-.nav-inner {
-  max-width: 900px; margin: auto;
-  display: flex; align-items: center; justify-content: space-between;
-  padding: 0 16px;
-}
-.nav-logo { display: flex; align-items: center; gap: 10px; padding: 16px 0; }
-.nav-logo-badge {
-  width: 36px; height: 36px; border-radius: 10px;
-  background: linear-gradient(135deg, var(--accent), #6366f1);
-  display: flex; align-items: center; justify-content: center;
-  font-size: 18px;
-}
-.nav-logo h1 { font-size: 15px; font-weight: 800; letter-spacing: -.02em; color: var(--text); }
-.nav-logo p { font-size: 9px; color: var(--muted); letter-spacing: .15em; text-transform: uppercase; }
-.nav-progress { display: flex; align-items: center; gap: 10px; }
-.nav-pct { font-family: 'Syne', sans-serif; font-size: 13px; font-weight: 700; color: var(--accent); }
-.nav-bar { width: 80px; height: 4px; background: var(--border); border-radius: 99px; overflow: hidden; }
-.nav-bar-fill { height: 100%; background: linear-gradient(90deg, var(--accent), var(--accent2)); border-radius: 99px; transition: width .5s ease; }
-
-/* ── BOTTOM TABS ── */
-.bottom-nav {
-  position: fixed; bottom: 0; left: 0; right: 0; z-index: 100;
-  background: rgba(10,12,16,.95); backdrop-filter: blur(20px);
-  border-top: 1px solid var(--border);
-  display: flex;
-}
-.bnav-btn {
-  flex: 1; display: flex; flex-direction: column; align-items: center;
-  padding: 10px 4px 12px;
-  background: none; border: none; color: var(--muted);
-  font-family: 'DM Sans', sans-serif; font-size: 8px; font-weight: 600;
-  letter-spacing: .1em; text-transform: uppercase; cursor: pointer;
-  transition: color .2s; gap: 4px;
-}
-.bnav-btn .icon { font-size: 18px; transition: transform .2s; }
-.bnav-btn.active { color: var(--accent); }
-.bnav-btn.active .icon { transform: scale(1.15); }
-
-/* ── SECTIONS ── */
-.section { display: none; }
-.section.active { display: block; }
-.container { max-width: 900px; margin: auto; padding: 20px 16px; }
-
-/* ── CARDS ── */
-.card {
-  background: var(--surface); border: 1px solid var(--border);
-  border-radius: 20px; padding: 20px; margin-bottom: 16px;
-}
-.card-sm { padding: 14px; border-radius: 14px; }
-.card-label {
-  font-size: 9px; font-weight: 700; letter-spacing: .15em;
-  text-transform: uppercase; color: var(--muted); margin-bottom: 12px;
-}
-
-/* ── HERO STATS ── */
-.stats-row { display: grid; grid-template-columns: repeat(3,1fr); gap: 10px; margin-bottom: 16px; }
-.stat-card {
-  background: var(--surface2); border: 1px solid var(--border);
-  border-radius: 16px; padding: 14px 12px; text-align: center;
-}
-.stat-val { font-family: 'Syne', sans-serif; font-size: 22px; font-weight: 800; }
-.stat-lbl { font-size: 9px; color: var(--muted); letter-spacing: .1em; text-transform: uppercase; margin-top: 2px; }
-
-/* ── DAY SELECTOR ── */
-.day-row { display: flex; gap: 8px; overflow-x: auto; padding-bottom: 4px; margin-bottom: 16px; scrollbar-width: none; }
-.day-row::-webkit-scrollbar { display: none; }
-.day-btn {
-  min-width: 48px; height: 52px; border-radius: 14px;
-  background: var(--surface2); border: 1px solid var(--border);
-  color: var(--muted); cursor: pointer; flex-shrink: 0;
-  display: flex; flex-direction: column; align-items: center; justify-content: center;
-  font-family: 'Syne', sans-serif; font-size: 11px; font-weight: 700;
-  transition: all .2s; gap: 2px;
-}
-.day-btn .day-dot { width: 4px; height: 4px; border-radius: 99px; background: transparent; transition: background .2s; }
-.day-btn.active { background: var(--accent); border-color: var(--accent); color: white; }
-.day-btn.active .day-dot { background: rgba(255,255,255,.5); }
-.day-btn.has-progress .day-dot { background: var(--accent2); }
-
-/* ── TIMELINE ── */
-.timeline { position: relative; padding-left: 32px; }
-.timeline-item {
-  position: relative; padding-bottom: 20px; cursor: pointer;
-}
-.timeline-item:last-child { padding-bottom: 0; }
-.timeline-item::before {
-  content: ''; position: absolute; left: -22px; top: 22px; bottom: -22px;
-  width: 1px; background: var(--border);
-}
-.timeline-item:last-child::before { display: none; }
-.timeline-dot {
-  position: absolute; left: -30px; top: 6px;
-  width: 18px; height: 18px; border-radius: 99px;
-  background: var(--surface2); border: 2px solid var(--border);
-  transition: all .2s; z-index: 1;
-  display: flex; align-items: center; justify-content: center; font-size: 10px;
-}
-.timeline-item.done .timeline-dot { background: var(--accent2); border-color: var(--accent2); }
-.timeline-item.done .timeline-dot::after { content: '✓'; color: white; font-size: 9px; font-weight: 900; }
-.timeline-item.done .timeline-body { opacity: .45; }
-.timeline-time { font-size: 10px; font-weight: 600; color: var(--muted); margin-bottom: 3px; font-family: 'DM Mono', monospace; }
-.timeline-body { background: var(--surface2); border: 1px solid var(--border); border-radius: 12px; padding: 12px 14px; transition: border-color .2s; }
-.timeline-item:not(.done):hover .timeline-body { border-color: var(--accent); }
-.timeline-title { font-weight: 600; font-size: 13px; color: var(--text); }
-.timeline-sub { font-size: 11px; color: var(--muted); margin-top: 2px; }
-.tag {
-  display: inline-block; font-size: 8px; font-weight: 700;
-  letter-spacing: .1em; text-transform: uppercase; padding: 2px 7px;
-  border-radius: 5px; margin-bottom: 6px;
-}
-.tag-fisico { background: rgba(100,116,139,.2); color: #94a3b8; }
-.tag-port    { background: rgba(59,130,246,.2); color: #93c5fd; }
-.tag-mat     { background: rgba(245,158,11,.2); color: #fcd34d; }
-.tag-dir     { background: rgba(139,92,246,.2); color: #c4b5fd; }
-.tag-legis   { background: rgba(16,185,129,.2); color: #6ee7b7; }
-.tag-escola  { background: rgba(20,184,166,.2); color: #5eead4; }
-.tag-extra   { background: rgba(99,102,241,.2); color: #a5b4fc; }
-.tag-teste   { background: rgba(236,72,153,.2); color: #f9a8d4; }
-.tag-descanso{ background: rgba(34,197,94,.2); color: #86efac; }
-
-/* ── SUBJECT CARDS ── */
-.subject-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-.subject-card {
-  background: var(--surface2); border: 1px solid var(--border);
-  border-radius: 16px; padding: 16px; position: relative; overflow: hidden;
-  transition: border-color .2s, transform .15s;
-}
-.subject-card:hover { border-color: rgba(59,130,246,.4); transform: translateY(-1px); }
-.subject-card .s-icon { font-size: 24px; margin-bottom: 8px; }
-.subject-card .s-name { font-family: 'Syne', sans-serif; font-size: 13px; font-weight: 700; }
-.subject-card .s-level { font-size: 9px; color: var(--muted); margin-top: 2px; letter-spacing: .05em; }
-.subject-card .s-bar { height: 3px; border-radius: 99px; background: var(--border); margin-top: 10px; }
-.subject-card .s-bar-fill { height: 100%; border-radius: 99px; }
-.s-bar-fill.port  { background: var(--accent); width: 90%; }
-.s-bar-fill.legis { background: var(--accent2); width: 80%; }
-.s-bar-fill.mat   { background: var(--accent3); width: 50%; }
-.s-bar-fill.dir   { background: #8b5cf6; width: 65%; }
-.s-bar-fill.red   { background: var(--accent4); width: 70%; }
-.s-bar-fill.adm   { background: #6366f1; width: 60%; }
-
-/* ── PROGRESS RING ── */
-.ring-wrap { display: flex; align-items: center; justify-content: center; margin: 12px 0; }
-.ring-text { font-family: 'Syne', sans-serif; font-size: 28px; font-weight: 800; }
-.ring-sub { font-size: 10px; color: var(--muted); }
-
-/* ── DIÁRIO ── */
-.diary-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; }
-.diary-date { font-size: 11px; color: var(--muted); }
-textarea.diary-input {
-  width: 100%; background: var(--surface2); border: 1px solid var(--border);
-  border-radius: 14px; padding: 14px; color: var(--text);
-  font-family: 'DM Sans', sans-serif; font-size: 13px; line-height: 1.6;
-  resize: none; min-height: 120px; outline: none; transition: border-color .2s;
-}
-textarea.diary-input:focus { border-color: var(--accent); }
-.diary-entries { margin-top: 16px; display: flex; flex-direction: column; gap: 10px; }
-.diary-entry {
-  background: var(--surface2); border: 1px solid var(--border);
-  border-radius: 14px; padding: 14px; position: relative;
-}
-.diary-entry-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 6px; }
-.diary-entry-date { font-size: 9px; color: var(--muted); letter-spacing: .08em; }
-.diary-entry-del { background: none; border: none; color: var(--muted); cursor: pointer; font-size: 14px; padding: 2px 6px; border-radius: 6px; }
-.diary-entry-del:hover { color: var(--danger); background: rgba(239,68,68,.1); }
-.diary-entry-text { font-size: 12px; line-height: 1.6; color: #94a3b8; white-space: pre-wrap; }
-.btn-primary {
-  width: 100%; padding: 13px; background: var(--accent); border: none;
-  border-radius: 12px; color: white; font-family: 'Syne', sans-serif;
-  font-size: 13px; font-weight: 700; cursor: pointer; margin-top: 10px;
-  transition: opacity .2s, transform .1s;
-}
-.btn-primary:active { opacity: .85; transform: scale(.98); }
-.btn-ghost {
-  background: none; border: 1px solid var(--border); color: var(--muted);
-  border-radius: 10px; padding: 8px 14px; font-size: 11px; cursor: pointer;
-  transition: border-color .2s, color .2s;
-}
-.btn-ghost:hover { border-color: var(--accent); color: var(--accent); }
-
-/* ── EDITAL SECTION ── */
-.phase-list { display: flex; flex-direction: column; gap: 10px; }
-.phase-item {
-  background: var(--surface2); border: 1px solid var(--border);
-  border-radius: 14px; padding: 14px 16px; display: flex; align-items: center; gap: 14px;
-}
-.phase-num {
-  width: 32px; height: 32px; border-radius: 10px; flex-shrink: 0;
-  display: flex; align-items: center; justify-content: center;
-  font-family: 'Syne', sans-serif; font-size: 13px; font-weight: 800;
-}
-.phase-name { font-size: 13px; font-weight: 600; }
-.phase-type { font-size: 9px; color: var(--muted); margin-top: 2px; letter-spacing: .05em; text-transform: uppercase; }
-.deadline-card {
-  background: linear-gradient(135deg, rgba(59,130,246,.15), rgba(16,185,129,.1));
-  border: 1px solid rgba(59,130,246,.3); border-radius: 16px; padding: 16px; margin-bottom: 16px;
-}
-.deadline-title { font-family: 'Syne', sans-serif; font-size: 16px; font-weight: 800; }
-.deadline-date { font-size: 22px; font-weight: 700; color: var(--accent); margin: 4px 0; font-family: 'Syne', sans-serif; }
-.countdown-row { display: flex; gap: 8px; margin-top: 10px; }
-.countdown-box {
-  flex: 1; background: rgba(0,0,0,.3); border-radius: 10px; padding: 8px 4px; text-align: center;
-}
-.countdown-num { font-family: 'Syne', sans-serif; font-size: 20px; font-weight: 800; color: var(--accent); }
-.countdown-lbl { font-size: 8px; color: var(--muted); letter-spacing: .1em; text-transform: uppercase; }
-
-/* ── CHART ── */
-.chart-wrap { position: relative; height: 220px; width: 100%; }
-
-/* ── UTILS ── */
-.divider { height: 1px; background: var(--border); margin: 16px 0; }
-.badge {
-  display: inline-flex; align-items: center; gap: 4px;
-  padding: 4px 10px; border-radius: 99px; font-size: 9px; font-weight: 700;
-  letter-spacing: .08em; text-transform: uppercase;
-}
-.badge-blue { background: rgba(59,130,246,.15); color: #93c5fd; border: 1px solid rgba(59,130,246,.25); }
-.badge-green { background: rgba(16,185,129,.15); color: #6ee7b7; border: 1px solid rgba(16,185,129,.25); }
-.badge-amber { background: rgba(245,158,11,.15); color: #fcd34d; border: 1px solid rgba(245,158,11,.25); }
-.badge-red { background: rgba(239,68,68,.15); color: #fca5a5; border: 1px solid rgba(239,68,68,.25); }
-.flex-between { display: flex; align-items: center; justify-content: space-between; }
-.mt-4 { margin-top: 16px; }
-
-/* ── RESPONSIVE ── */
-@media (min-width: 600px) {
-  .subject-grid { grid-template-columns: repeat(3, 1fr); }
-  .stats-row { gap: 14px; }
-}
-</style>
-</head>
-<body>
-
-<!-- NAV -->
-<nav class="nav">
-  <div class="nav-inner">
-    <div class="nav-logo">
-      <div class="nav-logo-badge">🦅</div>
-      <div>
-        <h1>PMAL 2026</h1>
-        <p>Super Hub de Aprovação</p>
-      </div>
-    </div>
-    <div class="nav-progress">
-      <span class="nav-pct" id="nav-pct">0%</span>
-      <div class="nav-bar"><div class="nav-bar-fill" id="nav-bar" style="width:0%"></div></div>
-    </div>
-  </div>
-</nav>
-
-<!-- SEÇÃO: ROTINA -->
-<div id="sec-rotina" class="section active">
-  <div class="container">
-
-    <div class="stats-row">
-      <div class="stat-card">
-        <div class="stat-val" style="color:var(--accent)" id="stat-done">0</div>
-        <div class="stat-lbl">Tarefas Hoje</div>
-      </div>
-      <div class="stat-card">
-        <div class="stat-val" style="color:var(--accent2)">19/7</div>
-        <div class="stat-lbl">Prova PMAL</div>
-      </div>
-      <div class="stat-card">
-        <div class="stat-val" style="color:var(--accent3)" id="stat-dias">—</div>
-        <div class="stat-lbl">Dias Restantes</div>
-      </div>
-    </div>
-
-    <div class="card" style="padding:16px 20px">
-      <div class="card-label">Cronograma — Selecione o Dia</div>
-      <div class="day-row" id="day-row"></div>
-      <div id="timeline-container"></div>
-      <div style="margin-top:14px; display:flex; justify-content:flex-end">
-        <button class="btn-ghost" onclick="resetDay()">🔄 Limpar dia</button>
-      </div>
-    </div>
-
-  </div>
-</div>
-
-<!-- SEÇÃO: ESTUDO -->
-<div id="sec-estudo" class="section">
-  <div class="container">
-
-    <div class="card">
-      <div class="card-label">Meta de Esforço por Matéria</div>
-      <div class="chart-wrap"><canvas id="priorityChart"></canvas></div>
-    </div>
-
-    <div class="card">
-      <div class="card-label">Plano Semanal por Disciplina</div>
-      <div class="subject-grid" id="subject-grid"></div>
-    </div>
-
-    <div class="card">
-      <div class="card-label">Estratégia Ativa</div>
-      <div style="display:flex; flex-direction:column; gap:10px" id="strategy-cards"></div>
-    </div>
-
-  </div>
-</div>
-
-<!-- SEÇÃO: EDITAL -->
-<div id="sec-edital" class="section">
-  <div class="container">
-
-    <div class="deadline-card">
-      <div class="deadline-title">📋 Concurso PMAL 2026 — Soldado</div>
-      <div class="deadline-date">19 de Julho de 2026</div>
-      <p style="font-size:11px; color:var(--muted)">Data das Provas Objetivas e Discursiva</p>
-      <div class="countdown-row" id="countdown-row">
-        <div class="countdown-box"><div class="countdown-num" id="cd-dias">—</div><div class="countdown-lbl">Dias</div></div>
-        <div class="countdown-box"><div class="countdown-num" id="cd-hrs">—</div><div class="countdown-lbl">Horas</div></div>
-        <div class="countdown-box"><div class="countdown-num" id="cd-min">—</div><div class="countdown-lbl">Min</div></div>
-      </div>
-    </div>
-
-    <div class="card">
-      <div class="card-label">Fases do Concurso</div>
-      <div class="phase-list">
-        <div class="phase-item">
-          <div class="phase-num" style="background:rgba(59,130,246,.15);color:var(--accent)">1</div>
-          <div><div class="phase-name">Provas Objetivas (P1 + P2)</div><div class="phase-type">Eliminatório e Classificatório · 19/07/2026</div></div>
-        </div>
-        <div class="phase-item">
-          <div class="phase-num" style="background:rgba(59,130,246,.15);color:var(--accent)">2</div>
-          <div><div class="phase-name">Prova Discursiva (P3)</div><div class="phase-type">Eliminatório e Classificatório · 19/07/2026</div></div>
-        </div>
-        <div class="phase-item">
-          <div class="phase-num" style="background:rgba(16,185,129,.15);color:var(--accent2)">3</div>
-          <div><div class="phase-name">Teste de Aptidão Física (TAF)</div><div class="phase-type">Eliminatório · 3 dias · Maceió/AL</div></div>
-        </div>
-        <div class="phase-item">
-          <div class="phase-num" style="background:rgba(245,158,11,.15);color:var(--accent3)">4</div>
-          <div><div class="phase-name">Avaliação Médica</div><div class="phase-type">Eliminatório · Junta Médica Cebraspe</div></div>
-        </div>
-        <div class="phase-item">
-          <div class="phase-num" style="background:rgba(245,158,11,.15);color:var(--accent3)">5</div>
-          <div><div class="phase-name">Avaliação Psicológica</div><div class="phase-type">Eliminatório · CFP</div></div>
-        </div>
-        <div class="phase-item">
-          <div class="phase-num" style="background:rgba(139,92,246,.15);color:#c4b5fd">6</div>
-          <div><div class="phase-name">Comprovação Documental e Inv. Social</div><div class="phase-type">Eliminatório · DINT/PMAL</div></div>
-        </div>
-        <div class="phase-item">
-          <div class="phase-num" style="background:rgba(239,68,68,.15);color:var(--danger)">7</div>
-          <div><div class="phase-name">Exame Toxicológico</div><div class="phase-type">Eliminatório · 180 dias de detecção</div></div>
-        </div>
-      </div>
-    </div>
-
-    <div class="card">
-      <div class="card-label">Vagas — Soldado do Quadro de Praças</div>
-      <div class="stats-row" style="margin-bottom:0">
-        <div class="stat-card"><div class="stat-val" style="color:var(--accent)">500</div><div class="stat-lbl">Imediatas</div></div>
-        <div class="stat-card"><div class="stat-val" style="color:var(--accent2)">500</div><div class="stat-lbl">Cadastro Reserva</div></div>
-        <div class="stat-card"><div class="stat-val" style="color:var(--accent3)">1.000</div><div class="stat-lbl">Total</div></div>
-      </div>
-    </div>
-
-    <div class="card">
-      <div class="card-label">TAF — Metas Físicas</div>
-      <div style="display:flex;flex-direction:column;gap:8px">
-        <div class="phase-item" style="padding:12px 14px">
-          <div style="font-size:20px">🏃</div>
-          <div><div class="phase-name">Corrida 2.000m</div><div class="phase-type">Meta: ≤ 11 minutos (masc.)</div></div>
-        </div>
-        <div class="phase-item" style="padding:12px 14px">
-          <div style="font-size:20px">💪</div>
-          <div><div class="phase-name">Abdominal</div><div class="phase-type">Meta: ≥ 40 repetições / 1 min (masc.)</div></div>
-        </div>
-        <div class="phase-item" style="padding:12px 14px">
-          <div style="font-size:20px">🔗</div>
-          <div><div class="phase-name">Barra Fixa</div><div class="phase-type">Meta: ≥ 4 repetições (masc.)</div></div>
-        </div>
-        <div class="phase-item" style="padding:12px 14px">
-          <div style="font-size:20px">⚡</div>
-          <div><div class="phase-name">Shuttle Run</div><div class="phase-type">Meta: ≤ 11 segundos (masc.)</div></div>
-        </div>
-        <div class="phase-item" style="padding:12px 14px">
-          <div style="font-size:20px">🏊</div>
-          <div><div class="phase-name">Natação 50m</div><div class="phase-type">Meta: ≤ 1min 5s</div></div>
-        </div>
-      </div>
-    </div>
-
-    <div class="card">
-      <div class="card-label">Prazos Críticos</div>
-      <div style="display:flex;flex-direction:column;gap:8px">
-        <div class="flex-between" style="padding:10px 0; border-bottom:1px solid var(--border)">
-          <span style="font-size:12px">Inscrições abertas</span>
-          <span class="badge badge-blue">30/03 – 30/04/2026</span>
-        </div>
-        <div class="flex-between" style="padding:10px 0; border-bottom:1px solid var(--border)">
-          <span style="font-size:12px">Pagamento da taxa (R$ 150)</span>
-          <span class="badge badge-amber">até 05/05/2026</span>
-        </div>
-        <div class="flex-between" style="padding:10px 0; border-bottom:1px solid var(--border)">
-          <span style="font-size:12px">Divulgação locais de prova</span>
-          <span class="badge badge-blue">03/07/2026</span>
-        </div>
-        <div class="flex-between" style="padding:10px 0">
-          <span style="font-size:12px; font-weight:700">📅 PROVA (P1 + P2 + P3)</span>
-          <span class="badge badge-green">19/07/2026</span>
-        </div>
-      </div>
-    </div>
-
-  </div>
-</div>
-
-<!-- SEÇÃO: DIÁRIO -->
-<div id="sec-diario" class="section">
-  <div class="container">
-
-    <div class="card">
-      <div class="diary-header">
-        <div>
-          <div class="card-label" style="margin-bottom:2px">Diário de Bordo</div>
-          <div class="diary-date" id="diary-today"></div>
-        </div>
-        <span style="font-size:22px">📓</span>
-      </div>
-      <textarea class="diary-input" id="diary-input" placeholder="Anota aqui: tarefas extras do dia, observações, dúvidas de estudo, metas, lembretes... Tudo que surgir!"></textarea>
-      <button class="btn-primary" onclick="saveDiary()">💾 Salvar Nota</button>
-    </div>
-
-    <div class="card">
-      <div class="flex-between" style="margin-bottom:12px">
-        <div class="card-label" style="margin-bottom:0">Notas Anteriores</div>
-        <button class="btn-ghost" onclick="clearAllDiary()" style="font-size:10px">Limpar tudo</button>
-      </div>
-      <div class="diary-entries" id="diary-entries">
-        <p style="font-size:12px; color:var(--muted); text-align:center; padding:20px 0">Nenhuma nota ainda. Começa agora! 🚀</p>
-      </div>
-    </div>
-
-  </div>
-</div>
-
-<!-- BOTTOM NAV -->
-<nav class="bottom-nav">
-  <button class="bnav-btn active" onclick="goTo('rotina', this)" id="btn-rotina">
-    <span class="icon">📅</span>Rotina
-  </button>
-  <button class="bnav-btn" onclick="goTo('estudo', this)" id="btn-estudo">
-    <span class="icon">📚</span>Estudo
-  </button>
-  <button class="bnav-btn" onclick="goTo('edital', this)" id="btn-edital">
-    <span class="icon">🛡️</span>Edital
-  </button>
-  <button class="bnav-btn" onclick="goTo('diario', this)" id="btn-diario">
-    <span class="icon">📓</span>Diário
-  </button>
-</nav>
-
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PMAL 2026 — Hub de Produtividade</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<script src="https://cdn.tailwindcss.com"></script>
 <script>
-// ─── DATA ───────────────────────────────────────────────────────────────────
-
-const DAYS = ['dom','seg','ter','qua','qui','sex','sab'];
-const DAY_LABELS = { seg:'Seg', ter:'Ter', qua:'Qua', qui:'Qui', sex:'Sex', sab:'Sáb', dom:'Dom' };
-const DAY_FULL = { seg:'Segunda', ter:'Terça', qua:'Quarta', qui:'Quinta', sex:'Sexta', sab:'Sábado', dom:'Domingo' };
-
-const schedule = {
-  seg: [
-    { id:'s1', time:'04:40', title:'Despertar / Oração', tag:'rotina', icon:'🌅' },
-    { id:'s2', time:'05:00', title:'TAF — Corrida 2km', tag:'fisico', sub:'Meta: ≤11min', icon:'🏃' },
-    { id:'s3', time:'07:00', title:'Estudo 1: Matemática', tag:'mat', sub:'Logaritmos e Funções', icon:'📐' },
-    { id:'s4', time:'08:00', title:'Inglês (IFAL/IFMAKER)', tag:'extra', icon:'💻' },
-    { id:'s5', time:'10:30', title:'Revisão Anki na Van', tag:'extra', sub:'Flashcards legislação', icon:'🚌' },
-    { id:'s6', time:'12:00', title:'Aulas IFAL', tag:'escola', icon:'🏫' },
-    { id:'s7', time:'19:20', title:'Academia — Força + Core', tag:'fisico', sub:'Barra fixa e abdominal', icon:'🏋️' },
-    { id:'s8', time:'21:40', title:'Estudo 2: Questões Matemática', tag:'mat', sub:'Fixação e bateria CESPE', icon:'📝' },
-    { id:'s9', time:'22:40', title:'Dormir', tag:'rotina', icon:'🌙' }
-  ],
-  ter: [
-    { id:'t1', time:'04:40', title:'Despertar / Oração', tag:'rotina', icon:'🌅' },
-    { id:'t2', time:'05:00', title:'TAF — Corrida', tag:'fisico', sub:'Intervalo e ritmo', icon:'🏃' },
-    { id:'t3', time:'07:00', title:'Estudo 1: Português', tag:'port', sub:'Morfologia e Acentuação', icon:'📖' },
-    { id:'t4', time:'08:00', title:'IFMAKER — Monitoria', tag:'extra', icon:'💻' },
-    { id:'t5', time:'10:30', title:'Revisão Anki na Van', tag:'extra', icon:'🚌' },
-    { id:'t6', time:'12:00', title:'Aulas IFAL', tag:'escola', icon:'🏫' },
-    { id:'t7', time:'19:20', title:'Academia', tag:'fisico', icon:'🏋️' },
-    { id:'t8', time:'21:40', title:'Estudo 2: Questões Português', tag:'port', sub:'Gramática CESPE', icon:'📝' },
-    { id:'t9', time:'22:40', title:'Dormir', tag:'rotina', icon:'🌙' }
-  ],
-  qua: [
-    { id:'q1', time:'04:40', title:'Despertar / Oração', tag:'rotina', icon:'🌅' },
-    { id:'q2', time:'05:00', title:'TAF — Shuttle Run + Abdominal', tag:'fisico', sub:'Meta: ≤11s e ≥40 rep', icon:'⚡' },
-    { id:'q3', time:'07:00', title:'Estudo 1: Dir. Penal', tag:'dir', sub:'Teoria do Crime — Partes I-III', icon:'⚖️' },
-    { id:'q4', time:'08:00', title:'IFMAKER — Monitoria', tag:'extra', icon:'💻' },
-    { id:'q5', time:'10:30', title:'Revisão Anki na Van', tag:'extra', icon:'🚌' },
-    { id:'q6', time:'12:00', title:'Aulas IFAL', tag:'escola', icon:'🏫' },
-    { id:'q7', time:'19:20', title:'Academia', tag:'fisico', icon:'🏋️' },
-    { id:'q8', time:'21:40', title:'Estudo 2: Questões Penal', tag:'dir', sub:'Bateria Dir. Penal CESPE', icon:'📝' },
-    { id:'q9', time:'22:40', title:'Dormir', tag:'rotina', icon:'🌙' }
-  ],
-  qui: [
-    { id:'qi1', time:'04:40', title:'Despertar / Oração', tag:'rotina', icon:'🌅' },
-    { id:'qi2', time:'05:00', title:'TAF — Corrida + Barra', tag:'fisico', sub:'Força membros superiores', icon:'🏃' },
-    { id:'qi3', time:'07:00', title:'Estudo 1: Português', tag:'port', sub:'Sintaxe e Concordância', icon:'📖' },
-    { id:'qi4', time:'08:00', title:'IFMAKER — Monitoria', tag:'extra', icon:'💻' },
-    { id:'qi5', time:'10:30', title:'Revisão Anki na Van', tag:'extra', icon:'🚌' },
-    { id:'qi6', time:'12:00', title:'Aulas IFAL', tag:'escola', icon:'🏫' },
-    { id:'qi7', time:'19:20', title:'Academia', tag:'fisico', icon:'🏋️' },
-    { id:'qi8', time:'21:40', title:'Estudo 2: Questões Português', tag:'port', sub:'Reescrita e Coesão', icon:'📝' },
-    { id:'qi9', time:'22:40', title:'Dormir', tag:'rotina', icon:'🌙' }
-  ],
-  sex: [
-    { id:'f1', time:'04:40', title:'Despertar / Oração', tag:'rotina', icon:'🌅' },
-    { id:'f2', time:'05:00', title:'TAF — Natação / Corrida Longa', tag:'fisico', sub:'50m ou resistência', icon:'🏊' },
-    { id:'f3', time:'07:00', title:'Estudo 1: Legislação PMAL', tag:'legis', sub:'Lei 5.346/92 — Estatuto', icon:'👮' },
-    { id:'f4', time:'08:00', title:'IFMAKER — Monitoria', tag:'extra', icon:'💻' },
-    { id:'f5', time:'10:30', title:'Revisão Anki na Van', tag:'extra', icon:'🚌' },
-    { id:'f6', time:'12:00', title:'Aulas IFAL', tag:'escola', icon:'🏫' },
-    { id:'f7', time:'19:20', title:'Academia', tag:'fisico', icon:'🏋️' },
-    { id:'f8', time:'21:40', title:'Estudo 2: Dir. Administrativo', tag:'dir', sub:'Princípios e Atos Adm.', icon:'📝' },
-    { id:'f9', time:'22:40', title:'Dormir', tag:'rotina', icon:'🌙' }
-  ],
-  sab: [
-    { id:'sa1', time:'07:00', title:'Estudo 1: Português', tag:'port', sub:'Simulado de Gramática (CESPE)', icon:'📖' },
-    { id:'sa2', time:'09:00', title:'Estudo 2: Matemática', tag:'mat', sub:'Geometria e Espacial', icon:'📐' },
-    { id:'sa3', time:'11:00', title:'Revisão da Semana', tag:'extra', sub:'Mapas mentais e anotações', icon:'🗺️' },
-    { id:'sa4', time:'19:20', title:'Academia', tag:'fisico', icon:'🏋️' },
-    { id:'sa5', time:'21:40', title:'Descanso Livre', tag:'descanso', sub:'Sem culpa. Você merece!', icon:'🎮' }
-  ],
-  dom: [
-    { id:'d1', time:'08:00', title:'Simulado Geral PMAL', tag:'teste', sub:'Simulação completa — condições reais', icon:'⏱️' },
-    { id:'d2', time:'11:00', title:'Análise de Erros', tag:'teste', sub:'Revisão detalhada do simulado', icon:'🔎' },
-    { id:'d3', time:'14:00', title:'Redação Dissertativa', tag:'port', sub:'Tema: Segurança Pública / Atualidades', icon:'✍️' },
-    { id:'d4', time:'16:00', title:'Descanso Ativo', tag:'descanso', sub:'Leitura, passeio, família', icon:'🌿' }
-  ]
-};
-
-const subjects = [
-  { key:'port',  icon:'📖', name:'Português',       level:'Prioridade Máxima', bar:'port',  weight:90 },
-  { key:'legis', icon:'👮', name:'Legislação PMAL', level:'Prioridade Alta',   bar:'legis', weight:80 },
-  { key:'dir',   icon:'⚖️', name:'D. Penal/Proc.',  level:'Prioridade Média',  bar:'dir',   weight:65 },
-  { key:'adm',   icon:'🏛️', name:'Dir. Adm/Const.', level:'Prioridade Média',  bar:'adm',   weight:60 },
-  { key:'mat',   icon:'📐', name:'Matemática',       level:'Manutenção',        bar:'mat',   weight:50 },
-  { key:'red',   icon:'✍️', name:'Redação',          level:'Prática Semanal',   bar:'red',   weight:70 }
-];
-
-const strategies = [
-  { icon:'📖', title:'Português', color:'rgba(59,130,246,.12)', border:'rgba(59,130,246,.3)', tips:[
-    'CESPE ama concordância nominal e verbal — estuda o "porquê" de cada erro',
-    'Compreensão textual: resolva 10 questões/dia de interpretação de texto',
-    'Foco em coesão e coerência para a prova discursiva'
-  ]},
-  { icon:'👮', title:'Legislação PMAL', color:'rgba(16,185,129,.12)', border:'rgba(16,185,129,.3)', tips:[
-    '"Lei Seca" não se lê, decora-se com repetição espaçada (Anki!)',
-    'Foco: Lei 5.346/92, Decreto 37.042/96, Lei 14.751/2023',
-    'Cria flashcards específicos de Hierarquia e Disciplina'
-  ]},
-  { icon:'✍️', title:'Redação (Discursiva)', color:'rgba(236,72,153,.12)', border:'rgba(236,72,153,.3)', tips:[
-    'Todo domingo: 1 redação cronometrada sem celular (90 min)',
-    'Temas: Segurança Pública, Violência, Direitos Humanos',
-    'Avalia: estrutura, coesão, argumentação e norma culta'
-  ]}
-];
-
-// ─── STATE ───────────────────────────────────────────────────────────────────
-let currentDay = DAYS[new Date().getDay()];
-let progress = JSON.parse(localStorage.getItem('pmal_hub_progress')) || {};
-let diaryEntries = JSON.parse(localStorage.getItem('pmal_hub_diary')) || [];
-let chartInst = null;
-
-// ─── NAVIGATION ──────────────────────────────────────────────────────────────
-function goTo(id, btn) {
-  document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
-  document.querySelectorAll('.bnav-btn').forEach(b => b.classList.remove('active'));
-  document.getElementById('sec-' + id).classList.add('active');
-  btn.classList.add('active');
-  if (id === 'estudo') renderPriorityChart();
-}
-
-// ─── COUNTDOWN ───────────────────────────────────────────────────────────────
-function updateCountdown() {
-  const target = new Date('2026-07-19T08:00:00');
-  const now = new Date();
-  const diff = target - now;
-  if (diff <= 0) { document.getElementById('stat-dias').textContent = '🎯'; return; }
-  const days = Math.floor(diff / 86400000);
-  const hrs  = Math.floor((diff % 86400000) / 3600000);
-  const mins = Math.floor((diff % 3600000) / 60000);
-  document.getElementById('stat-dias').textContent = days;
-  document.getElementById('cd-dias').textContent = days;
-  document.getElementById('cd-hrs').textContent  = hrs;
-  document.getElementById('cd-min').textContent  = mins;
-}
-
-// ─── DAY SELECTOR ────────────────────────────────────────────────────────────
-function renderDayRow() {
-  const row = document.getElementById('day-row');
-  row.innerHTML = '';
-  const orderedDays = ['seg','ter','qua','qui','sex','sab','dom'];
-  orderedDays.forEach(d => {
-    const tasks = schedule[d] || [];
-    const doneCount = tasks.filter(t => progress[t.id]).length;
-    const hasProgress = doneCount > 0 && doneCount < tasks.length;
-    const btn = document.createElement('button');
-    btn.className = 'day-btn' + (d === currentDay ? ' active' : '') + (hasProgress ? ' has-progress' : '');
-    btn.innerHTML = `${DAY_LABELS[d]}<div class="day-dot"></div>`;
-    btn.onclick = () => { currentDay = d; renderDayRow(); renderTimeline(); };
-    row.appendChild(btn);
-  });
-}
-
-// ─── TIMELINE ────────────────────────────────────────────────────────────────
-function renderTimeline() {
-  const container = document.getElementById('timeline-container');
-  const tasks = schedule[currentDay] || [];
-  const doneCount = tasks.filter(t => progress[t.id]).length;
-
-  document.getElementById('stat-done').textContent = `${doneCount}/${tasks.length}`;
-  updateNavProgress(doneCount, tasks.length);
-
-  container.innerHTML = `
-    <div style="font-size:12px;color:var(--muted);margin-bottom:14px;font-weight:600">
-      ${DAY_FULL[currentDay]} — ${doneCount} de ${tasks.length} concluídas
-    </div>
-    <div class="timeline">
-      ${tasks.map(task => {
-        const done = !!progress[task.id];
-        return `
-          <div class="timeline-item ${done ? 'done' : ''}" onclick="toggleTask('${task.id}')">
-            <div class="timeline-dot"></div>
-            <div class="timeline-time">${task.time}</div>
-            <div class="timeline-body">
-              <span class="tag tag-${task.tag}">${task.tag.toUpperCase()}</span>
-              <div class="timeline-title">${task.icon} ${task.title}</div>
-              ${task.sub ? `<div class="timeline-sub">${task.sub}</div>` : ''}
-            </div>
-          </div>
-        `;
-      }).join('')}
-    </div>
-  `;
-}
-
-function toggleTask(id) {
-  progress[id] = !progress[id];
-  localStorage.setItem('pmal_hub_progress', JSON.stringify(progress));
-  renderTimeline();
-  renderDayRow();
-}
-
-function resetDay() {
-  const tasks = schedule[currentDay] || [];
-  tasks.forEach(t => delete progress[t.id]);
-  localStorage.setItem('pmal_hub_progress', JSON.stringify(progress));
-  renderTimeline();
-  renderDayRow();
-}
-
-function updateNavProgress(done, total) {
-  const pct = total ? Math.round((done / total) * 100) : 0;
-  document.getElementById('nav-pct').textContent = pct + '%';
-  document.getElementById('nav-bar').style.width = pct + '%';
-}
-
-// ─── SUBJECT CARDS ───────────────────────────────────────────────────────────
-function renderSubjectGrid() {
-  const grid = document.getElementById('subject-grid');
-  grid.innerHTML = subjects.map(s => `
-    <div class="subject-card">
-      <div class="s-icon">${s.icon}</div>
-      <div class="s-name">${s.name}</div>
-      <div class="s-level">${s.level}</div>
-      <div class="s-bar"><div class="s-bar-fill ${s.bar}"></div></div>
-    </div>
-  `).join('');
-}
-
-function renderStrategyCards() {
-  const container = document.getElementById('strategy-cards');
-  container.innerHTML = strategies.map(s => `
-    <div style="background:${s.color};border:1px solid ${s.border};border-radius:16px;padding:16px">
-      <div style="font-size:18px;margin-bottom:8px">${s.icon}</div>
-      <div style="font-family:'Syne',sans-serif;font-size:14px;font-weight:700;margin-bottom:10px">${s.title}</div>
-      <div style="display:flex;flex-direction:column;gap:6px">
-        ${s.tips.map(tip => `
-          <div style="display:flex;gap:8px;align-items:flex-start">
-            <span style="color:var(--accent2);flex-shrink:0;margin-top:1px">›</span>
-            <span style="font-size:12px;color:#94a3b8;line-height:1.5">${tip}</span>
-          </div>
-        `).join('')}
-      </div>
-    </div>
-  `).join('');
-}
-
-// ─── PRIORITY CHART ──────────────────────────────────────────────────────────
-function renderPriorityChart() {
-  const ctx = document.getElementById('priorityChart');
-  if (!ctx) return;
-  if (chartInst) chartInst.destroy();
-  chartInst = new Chart(ctx, {
-    type: 'bar',
-    data: {
-      labels: subjects.map(s => s.name),
-      datasets: [{
-        data: subjects.map(s => s.weight),
-        backgroundColor: ['rgba(59,130,246,.7)','rgba(16,185,129,.7)','rgba(139,92,246,.7)','rgba(99,102,241,.7)','rgba(245,158,11,.7)','rgba(236,72,153,.7)'],
-        borderColor:     ['rgba(59,130,246,1)','rgba(16,185,129,1)','rgba(139,92,246,1)','rgba(99,102,241,1)','rgba(245,158,11,1)','rgba(236,72,153,1)'],
-        borderWidth: 2, borderRadius: 8
-      }]
-    },
-    options: {
-      indexAxis: 'y',
-      responsive: true, maintainAspectRatio: false,
-      plugins: { legend: { display: false }, tooltip: {
-        callbacks: { label: ctx => ` Esforço: ${ctx.raw}%` }
-      }},
-      scales: {
-        x: { grid: { color: 'rgba(255,255,255,.05)' }, ticks: { color: '#64748b', font: { size: 10 } }, max: 100 },
-        y: { grid: { display: false }, ticks: { color: '#94a3b8', font: { size: 11 } } }
+  tailwind.config = {
+    theme: {
+      extend: {
+        fontFamily: {
+          sans: ['DM Sans', 'sans-serif'],
+          mono: ['DM Mono', 'monospace'],
+        },
+        colors: {
+          brand: {
+            50: '#eff6ff',
+            100: '#dbeafe',
+            200: '#bfdbfe',
+            400: '#60a5fa',
+            500: '#3b82f6',
+            600: '#2563eb',
+            700: '#1d4ed8',
+          }
+        }
       }
     }
+  }
+</script>
+<style>
+  * { -webkit-tap-highlight-color: transparent; }
+  body { font-family: 'DM Sans', sans-serif; background: #f8fafc; color: #1e293b; }
+
+  /* Nav */
+  .nav-btn { transition: all .2s ease; }
+  .nav-btn.active { background: #2563eb; color: #fff; }
+  .nav-btn:not(.active):hover { background: #e2e8f0; }
+
+  /* Day selector */
+  .day-btn { transition: all .2s ease; white-space: nowrap; }
+  .day-btn.active { background: #2563eb; color: #fff; box-shadow: 0 4px 14px rgba(37,99,235,.35); }
+  .day-btn:not(.active):hover { background: #e2e8f0; }
+
+  /* Task cards */
+  .task-card { transition: all .2s ease; border-left: 3px solid transparent; }
+  .task-card:hover { box-shadow: 0 4px 20px rgba(0,0,0,.08); transform: translateY(-1px); }
+  .task-card.done { opacity: .5; }
+  .task-card.done .task-title { text-decoration: line-through; color: #94a3b8; }
+  .task-card.sleep { border-left-color: #818cf8; background: linear-gradient(135deg,#f0f9ff,#f8fafc); }
+  .task-card.study { border-left-color: #34d399; }
+  .task-card.ifal  { border-left-color: #f59e0b; }
+  .task-card.gym   { border-left-color: #f472b6; }
+  .task-card.run   { border-left-color: #fb923c; }
+  .task-card.meal  { border-left-color: #a78bfa; }
+  .task-card.free  { border-left-color: #94a3b8; }
+
+  /* Progress bar */
+  .progress-fill { transition: width .5s cubic-bezier(.4,0,.2,1); }
+
+  /* Modal */
+  .modal-overlay { backdrop-filter: blur(4px); }
+  .modal-box { animation: modalIn .25s cubic-bezier(.34,1.56,.64,1); }
+  @keyframes modalIn { from { opacity:0; transform:scale(.92) translateY(12px); } to { opacity:1; transform:scale(1) translateY(0); } }
+
+  /* Note cards */
+  .note-card { animation: noteIn .3s cubic-bezier(.34,1.56,.64,1); }
+  @keyframes noteIn { from { opacity:0; transform:translateY(10px) scale(.96); } to { opacity:1; transform:none; } }
+
+  /* Countdown */
+  .cd-block { background: linear-gradient(135deg,#1e40af,#2563eb); }
+
+  /* TAF item */
+  .taf-item { transition: background .15s; }
+  .taf-item:hover { background: #eff6ff; }
+
+  /* Scrollbar */
+  ::-webkit-scrollbar { width: 4px; height: 4px; }
+  ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 99px; }
+
+  /* Checkbox custom */
+  .task-check { appearance: none; width: 18px; height: 18px; border: 2px solid #cbd5e1; border-radius: 50%; cursor: pointer; transition: all .2s; flex-shrink: 0; position: relative; }
+  .task-check:checked { background: #2563eb; border-color: #2563eb; }
+  .task-check:checked::after { content:''; position:absolute; left:4px; top:1px; width:5px; height:9px; border:2px solid #fff; border-top:none; border-left:none; transform:rotate(45deg); }
+
+  /* Section fade */
+  .section { animation: fadeIn .3s ease; }
+  @keyframes fadeIn { from { opacity:0; transform:translateY(6px); } to { opacity:1; transform:none; } }
+
+  /* Scroll days */
+  .days-scroll { scrollbar-width: none; }
+  .days-scroll::-webkit-scrollbar { display: none; }
+
+  /* Reset btn */
+  .reset-btn { background: linear-gradient(135deg,#f59e0b,#f97316); }
+  .reset-btn:hover { background: linear-gradient(135deg,#d97706,#ea580c); }
+</style>
+</head>
+<body class="min-h-screen pb-24">
+
+<!-- TOP HEADER -->
+<header class="sticky top-0 z-40 bg-white/90 backdrop-blur-md border-b border-slate-100 shadow-sm">
+  <div class="max-w-2xl mx-auto px-4 py-3 flex items-center justify-between gap-3">
+    <div class="flex items-center gap-2">
+      <div class="w-8 h-8 rounded-xl bg-blue-600 flex items-center justify-center text-white text-sm font-bold shadow">P</div>
+      <div>
+        <div class="font-semibold text-slate-800 leading-tight text-sm">PMAL 2026</div>
+        <div class="text-[10px] text-slate-400 leading-tight font-mono">Hub de Produtividade</div>
+      </div>
+    </div>
+    <nav class="flex gap-1 bg-slate-100 p-1 rounded-xl">
+      <button onclick="showSection('rotina')" id="nav-rotina" class="nav-btn active text-xs font-medium px-3 py-1.5 rounded-lg">📅 Rotina</button>
+      <button onclick="showSection('edital')" id="nav-edital" class="nav-btn text-xs font-medium px-3 py-1.5 rounded-lg">📋 Edital</button>
+      <button onclick="showSection('notas')" id="nav-notas" class="nav-btn text-xs font-medium px-3 py-1.5 rounded-lg">📓 Notas</button>
+    </nav>
+  </div>
+</header>
+
+<!-- ======================== SECTION: ROTINA ======================== -->
+<section id="section-rotina" class="section max-w-2xl mx-auto px-4 pt-4">
+
+  <!-- Day selector -->
+  <div class="days-scroll flex gap-2 overflow-x-auto pb-2 mb-4">
+    <button onclick="selectDay(0)" id="day-0" class="day-btn text-xs font-semibold px-4 py-2 rounded-full bg-white border border-slate-200 shadow-sm">Seg</button>
+    <button onclick="selectDay(1)" id="day-1" class="day-btn text-xs font-semibold px-4 py-2 rounded-full bg-white border border-slate-200 shadow-sm">Ter</button>
+    <button onclick="selectDay(2)" id="day-2" class="day-btn text-xs font-semibold px-4 py-2 rounded-full bg-white border border-slate-200 shadow-sm">Qua</button>
+    <button onclick="selectDay(3)" id="day-3" class="day-btn text-xs font-semibold px-4 py-2 rounded-full bg-white border border-slate-200 shadow-sm">Qui</button>
+    <button onclick="selectDay(4)" id="day-4" class="day-btn text-xs font-semibold px-4 py-2 rounded-full bg-white border border-slate-200 shadow-sm">Sex</button>
+    <button onclick="selectDay(5)" id="day-5" class="day-btn text-xs font-semibold px-4 py-2 rounded-full bg-white border border-slate-200 shadow-sm">Sáb</button>
+    <button onclick="selectDay(6)" id="day-6" class="day-btn text-xs font-semibold px-4 py-2 rounded-full bg-white border border-slate-200 shadow-sm">Dom</button>
+  </div>
+
+  <!-- Progress bar -->
+  <div id="progress-area" class="bg-white rounded-2xl p-4 shadow-sm border border-slate-100 mb-4">
+    <div class="flex items-center justify-between mb-2">
+      <span class="text-xs font-semibold text-slate-500 uppercase tracking-wide">Progresso do Dia</span>
+      <span id="progress-label" class="text-xs font-mono font-semibold text-blue-600">0 / 0</span>
+    </div>
+    <div class="h-2 bg-slate-100 rounded-full overflow-hidden">
+      <div id="progress-fill" class="progress-fill h-full bg-gradient-to-r from-blue-500 to-blue-400 rounded-full" style="width:0%"></div>
+    </div>
+  </div>
+
+  <!-- Task list -->
+  <div id="task-list" class="space-y-2 mb-4"></div>
+
+  <!-- Add task + Reset buttons -->
+  <div class="flex gap-2 mb-4">
+    <button onclick="openAddModal()" class="flex-1 flex items-center justify-center gap-2 bg-white border border-dashed border-blue-300 text-blue-600 text-sm font-medium py-3 rounded-xl hover:bg-blue-50 transition-colors">
+      <span class="text-lg leading-none">+</span> Adicionar Tarefa
+    </button>
+    <button onclick="openResetModal()" id="reset-week-btn" class="reset-btn text-white text-sm font-semibold px-4 py-3 rounded-xl shadow-sm transition-all hover:shadow-md hidden">
+      🔄 Reset
+    </button>
+  </div>
+
+</section>
+
+<!-- ======================== SECTION: EDITAL ======================== -->
+<section id="section-edital" class="section hidden max-w-2xl mx-auto px-4 pt-4 space-y-4">
+
+  <!-- Countdown -->
+  <div class="cd-block rounded-2xl p-5 text-white shadow-md">
+    <div class="text-xs font-mono uppercase tracking-widest opacity-70 mb-3">Contagem Regressiva — Prova PMAL</div>
+    <div class="flex gap-3 mb-3">
+      <div class="flex-1 text-center">
+        <div id="cd-dias" class="text-4xl font-bold font-mono">--</div>
+        <div class="text-[10px] uppercase tracking-widest opacity-60 mt-1">Dias</div>
+      </div>
+      <div class="flex-1 text-center">
+        <div id="cd-horas" class="text-4xl font-bold font-mono">--</div>
+        <div class="text-[10px] uppercase tracking-widest opacity-60 mt-1">Horas</div>
+      </div>
+      <div class="flex-1 text-center">
+        <div id="cd-min" class="text-4xl font-bold font-mono">--</div>
+        <div class="text-[10px] uppercase tracking-widest opacity-60 mt-1">Min</div>
+      </div>
+      <div class="flex-1 text-center">
+        <div id="cd-seg" class="text-4xl font-bold font-mono">--</div>
+        <div class="text-[10px] uppercase tracking-widest opacity-60 mt-1">Seg</div>
+      </div>
+    </div>
+    <div class="text-xs opacity-60 font-mono">📅 Data da Prova: 19 de Julho de 2026</div>
+  </div>
+
+  <!-- Vagas -->
+  <div class="bg-white rounded-2xl p-5 shadow-sm border border-slate-100">
+    <div class="text-xs font-semibold uppercase tracking-widest text-slate-400 mb-3">Resumo das Vagas</div>
+    <div class="grid grid-cols-3 gap-3">
+      <div class="bg-blue-50 rounded-xl p-3 text-center">
+        <div class="text-2xl font-bold text-blue-600 font-mono">500</div>
+        <div class="text-[11px] text-slate-500 mt-1">Imediatas</div>
+      </div>
+      <div class="bg-amber-50 rounded-xl p-3 text-center">
+        <div class="text-2xl font-bold text-amber-600 font-mono">500</div>
+        <div class="text-[11px] text-slate-500 mt-1">Cadastro Res.</div>
+      </div>
+      <div class="bg-green-50 rounded-xl p-3 text-center">
+        <div class="text-2xl font-bold text-green-600 font-mono">1.000</div>
+        <div class="text-[11px] text-slate-500 mt-1">Total</div>
+      </div>
+    </div>
+    <div class="mt-3 text-xs text-slate-500 bg-slate-50 rounded-xl p-3">
+      🎯 <strong>Cargo:</strong> Soldado Combatente — Masculino
+    </div>
+  </div>
+
+  <!-- TAF -->
+  <div class="bg-white rounded-2xl p-5 shadow-sm border border-slate-100">
+    <div class="text-xs font-semibold uppercase tracking-widest text-slate-400 mb-3">Metas do TAF — Masculino</div>
+    <div class="space-y-2">
+      <div class="taf-item flex items-center justify-between p-3 rounded-xl">
+        <div class="flex items-center gap-2">
+          <span class="text-lg">🏃</span>
+          <div>
+            <div class="text-sm font-semibold text-slate-700">Corrida 2.000m</div>
+            <div class="text-xs text-slate-400">Resistência aeróbica</div>
+          </div>
+        </div>
+        <div class="text-sm font-bold text-blue-600 font-mono bg-blue-50 px-3 py-1 rounded-full">≤ 11min</div>
+      </div>
+      <div class="taf-item flex items-center justify-between p-3 rounded-xl">
+        <div class="flex items-center gap-2">
+          <span class="text-lg">💪</span>
+          <div>
+            <div class="text-sm font-semibold text-slate-700">Abdominal</div>
+            <div class="text-xs text-slate-400">1 minuto</div>
+          </div>
+        </div>
+        <div class="text-sm font-bold text-green-600 font-mono bg-green-50 px-3 py-1 rounded-full">≥ 40 rep</div>
+      </div>
+      <div class="taf-item flex items-center justify-between p-3 rounded-xl">
+        <div class="flex items-center gap-2">
+          <span class="text-lg">🤸</span>
+          <div>
+            <div class="text-sm font-semibold text-slate-700">Barra Fixa</div>
+            <div class="text-xs text-slate-400">Força</div>
+          </div>
+        </div>
+        <div class="text-sm font-bold text-green-600 font-mono bg-green-50 px-3 py-1 rounded-full">≥ 4 rep</div>
+      </div>
+      <div class="taf-item flex items-center justify-between p-3 rounded-xl">
+        <div class="flex items-center gap-2">
+          <span class="text-lg">⚡</span>
+          <div>
+            <div class="text-sm font-semibold text-slate-700">Shuttle Run</div>
+            <div class="text-xs text-slate-400">Velocidade / Agilidade</div>
+          </div>
+        </div>
+        <div class="text-sm font-bold text-blue-600 font-mono bg-blue-50 px-3 py-1 rounded-full">≤ 11s</div>
+      </div>
+      <div class="taf-item flex items-center justify-between p-3 rounded-xl">
+        <div class="flex items-center gap-2">
+          <span class="text-lg">🏊</span>
+          <div>
+            <div class="text-sm font-semibold text-slate-700">Natação 50m</div>
+            <div class="text-xs text-slate-400">Resistência aquática</div>
+          </div>
+        </div>
+        <div class="text-sm font-bold text-blue-600 font-mono bg-blue-50 px-3 py-1 rounded-full">≤ 1min 5s</div>
+      </div>
+    </div>
+  </div>
+
+</section>
+
+<!-- ======================== SECTION: NOTAS ======================== -->
+<section id="section-notas" class="section hidden max-w-2xl mx-auto px-4 pt-4">
+
+  <!-- Add note form -->
+  <div class="bg-white rounded-2xl p-4 shadow-sm border border-slate-100 mb-4">
+    <div class="text-xs font-semibold uppercase tracking-widest text-slate-400 mb-3">Nova Anotação</div>
+    <textarea id="note-text" rows="3" placeholder="Escreva sua anotação aqui..." class="w-full text-sm text-slate-700 bg-slate-50 border border-slate-200 rounded-xl p-3 resize-none outline-none focus:ring-2 focus:ring-blue-200 focus:border-blue-400 transition placeholder-slate-300"></textarea>
+    <div class="flex items-center gap-2 mt-3">
+      <select id="note-priority" class="flex-1 text-sm bg-slate-50 border border-slate-200 rounded-xl p-2.5 outline-none focus:ring-2 focus:ring-blue-200 focus:border-blue-400 transition">
+        <option value="leve">🟢 Leve</option>
+        <option value="moderado">🟡 Moderado</option>
+        <option value="importante">🔴 Importante</option>
+      </select>
+      <button onclick="addNote()" class="bg-blue-600 text-white text-sm font-semibold px-5 py-2.5 rounded-xl hover:bg-blue-700 transition-colors shadow-sm">Adicionar</button>
+    </div>
+  </div>
+
+  <!-- Notes actions -->
+  <div id="notes-actions" class="hidden flex justify-end mb-3">
+    <button onclick="clearAllNotes()" class="text-xs text-red-400 hover:text-red-600 transition-colors font-medium">🗑 Limpar todas</button>
+  </div>
+
+  <!-- Notes list -->
+  <div id="notes-list" class="space-y-3"></div>
+  <div id="notes-empty" class="text-center py-12 text-slate-400">
+    <div class="text-4xl mb-3">📓</div>
+    <div class="text-sm">Nenhuma anotação ainda.<br>Adicione sua primeira nota acima.</div>
+  </div>
+
+</section>
+
+<!-- ======================== MODAL ======================== -->
+<div id="modal" class="hidden fixed inset-0 z-50 modal-overlay bg-black/40 flex items-end sm:items-center justify-center p-4">
+  <div class="modal-box bg-white rounded-2xl w-full max-w-md shadow-2xl overflow-hidden">
+    <div class="px-5 py-4 border-b border-slate-100 flex items-center justify-between">
+      <h3 id="modal-title" class="font-semibold text-slate-800">Editar Tarefa</h3>
+      <button onclick="closeModal()" class="w-8 h-8 flex items-center justify-center rounded-full hover:bg-slate-100 text-slate-400 transition">✕</button>
+    </div>
+    <div class="p-5 space-y-3">
+      <input type="hidden" id="modal-task-id">
+      <div class="grid grid-cols-2 gap-3">
+        <div>
+          <label class="text-xs font-medium text-slate-500 mb-1 block">Início</label>
+          <input id="modal-start" type="time" class="w-full text-sm bg-slate-50 border border-slate-200 rounded-xl p-2.5 outline-none focus:ring-2 focus:ring-blue-200 focus:border-blue-400 transition">
+        </div>
+        <div>
+          <label class="text-xs font-medium text-slate-500 mb-1 block">Término</label>
+          <input id="modal-end" type="time" class="w-full text-sm bg-slate-50 border border-slate-200 rounded-xl p-2.5 outline-none focus:ring-2 focus:ring-blue-200 focus:border-blue-400 transition">
+        </div>
+      </div>
+      <div>
+        <label class="text-xs font-medium text-slate-500 mb-1 block">Título</label>
+        <input id="modal-title-input" type="text" class="w-full text-sm bg-slate-50 border border-slate-200 rounded-xl p-2.5 outline-none focus:ring-2 focus:ring-blue-200 focus:border-blue-400 transition">
+      </div>
+      <div>
+        <label class="text-xs font-medium text-slate-500 mb-1 block">Observações / Planejamento</label>
+        <textarea id="modal-notes" rows="3" class="w-full text-sm bg-slate-50 border border-slate-200 rounded-xl p-2.5 resize-none outline-none focus:ring-2 focus:ring-blue-200 focus:border-blue-400 transition placeholder-slate-300" placeholder="Detalhe seu plano aqui..."></textarea>
+      </div>
+    </div>
+    <div class="px-5 pb-5 flex gap-2">
+      <button id="modal-delete-btn" onclick="deleteTaskFromModal()" class="px-4 py-2.5 text-sm font-medium text-red-500 hover:bg-red-50 rounded-xl transition">Excluir</button>
+      <div class="flex-1"></div>
+      <button onclick="closeModal()" class="px-4 py-2.5 text-sm font-medium text-slate-500 hover:bg-slate-100 rounded-xl transition">Cancelar</button>
+      <button onclick="saveModal()" class="px-5 py-2.5 text-sm font-semibold bg-blue-600 text-white rounded-xl hover:bg-blue-700 transition shadow-sm">Salvar</button>
+    </div>
+  </div>
+</div>
+
+<!-- RESET CONFIRM MODAL -->
+<div id="reset-modal" class="hidden fixed inset-0 z-50 modal-overlay bg-black/40 flex items-center justify-center p-4">
+  <div class="modal-box bg-white rounded-2xl w-full max-w-sm shadow-2xl p-6 text-center">
+    <div class="text-4xl mb-3">🔄</div>
+    <h3 class="font-bold text-slate-800 text-lg mb-2">Reiniciar Ciclo Semanal?</h3>
+    <p class="text-sm text-slate-500 mb-5">Todas as tarefas serão desmarcadas. Horários e observações serão mantidos.</p>
+    <div class="flex gap-3">
+      <button onclick="closeResetModal()" class="flex-1 py-2.5 text-sm font-medium text-slate-600 bg-slate-100 rounded-xl hover:bg-slate-200 transition">Cancelar</button>
+      <button onclick="confirmReset()" class="flex-1 py-2.5 text-sm font-semibold text-white reset-btn rounded-xl shadow-sm transition">Reiniciar!</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ============================================================
+// DATA
+// ============================================================
+const KEYS = { rotina: 'pmal_rotina', notas: 'pmal_notas' };
+const PROVA_DATE = new Date('2026-07-19T08:00:00');
+const DAYS_NAMES = ['Segunda-Feira','Terça-Feira','Quarta-Feira','Quinta-Feira','Sexta-Feira','Sábado','Domingo'];
+
+const DEFAULT_ROUTINE = [
+  // 0 - Segunda
+  [
+    { id: uid(), start:'06:00', end:'06:40', title:'Acordar, se arrumar e café da manhã', notes:'', done:false, type:'meal' },
+    { id: uid(), start:'06:40', end:'07:30', title:'Estudo (Leitura / Foco)', notes:'', done:false, type:'study' },
+    { id: uid(), start:'12:00', end:'18:50', title:'IFAL — Aulas', notes:'', done:false, type:'ifal' },
+    { id: uid(), start:'19:00', end:'20:50', title:'Academia', notes:'', done:false, type:'gym' },
+    { id: uid(), start:'21:30', end:'23:30', title:'Estudo', notes:'', done:false, type:'study' },
+    { id: uid(), start:'23:30', end:'06:00', title:'Dormir', notes:'', done:false, type:'sleep' },
+  ],
+  // 1 - Terça
+  [
+    { id: uid(), start:'04:45', end:'06:00', title:'Corrida na Praça (Foco TAF)', notes:'', done:false, type:'run' },
+    { id: uid(), start:'06:00', end:'07:10', title:'Se arrumar para o colégio', notes:'', done:false, type:'meal' },
+    { id: uid(), start:'07:10', end:'08:00', title:'Estudo', notes:'', done:false, type:'study' },
+    { id: uid(), start:'08:00', end:'12:00', title:'Monitoria Lab Maker (Estudo no tempo livre)', notes:'', done:false, type:'study' },
+    { id: uid(), start:'12:00', end:'18:50', title:'IFAL — Aulas', notes:'', done:false, type:'ifal' },
+    { id: uid(), start:'19:00', end:'20:50', title:'Academia', notes:'', done:false, type:'gym' },
+    { id: uid(), start:'21:30', end:'23:40', title:'Estudo', notes:'', done:false, type:'study' },
+    { id: uid(), start:'23:40', end:'04:45', title:'Dormir', notes:'', done:false, type:'sleep' },
+  ],
+  // 2 - Quarta
+  [
+    { id: uid(), start:'04:45', end:'07:20', title:'Rotina matinal e preparação', notes:'', done:false, type:'meal' },
+    { id: uid(), start:'07:20', end:'09:00', title:'Estudo', notes:'', done:false, type:'study' },
+    { id: uid(), start:'09:00', end:'18:50', title:'IFAL — Aulas / Contra-turno', notes:'', done:false, type:'ifal' },
+    { id: uid(), start:'19:00', end:'20:50', title:'Academia', notes:'', done:false, type:'gym' },
+    { id: uid(), start:'21:30', end:'23:40', title:'Estudo', notes:'', done:false, type:'study' },
+    { id: uid(), start:'23:40', end:'04:45', title:'Dormir', notes:'', done:false, type:'sleep' },
+  ],
+  // 3 - Quinta (= Quarta)
+  [
+    { id: uid(), start:'04:45', end:'07:20', title:'Rotina matinal e preparação', notes:'', done:false, type:'meal' },
+    { id: uid(), start:'07:20', end:'09:00', title:'Estudo', notes:'', done:false, type:'study' },
+    { id: uid(), start:'09:00', end:'18:50', title:'IFAL — Aulas / Contra-turno', notes:'', done:false, type:'ifal' },
+    { id: uid(), start:'19:00', end:'20:50', title:'Academia', notes:'', done:false, type:'gym' },
+    { id: uid(), start:'21:30', end:'23:40', title:'Estudo', notes:'', done:false, type:'study' },
+    { id: uid(), start:'23:40', end:'04:45', title:'Dormir', notes:'', done:false, type:'sleep' },
+  ],
+  // 4 - Sexta
+  [
+    { id: uid(), start:'04:45', end:'06:00', title:'Corrida na Praça (Foco TAF)', notes:'', done:false, type:'run' },
+    { id: uid(), start:'06:00', end:'07:10', title:'Se arrumar para o colégio', notes:'', done:false, type:'meal' },
+    { id: uid(), start:'07:10', end:'08:00', title:'Estudo', notes:'', done:false, type:'study' },
+    { id: uid(), start:'08:00', end:'12:00', title:'Monitoria Lab Maker (Estudo no tempo livre)', notes:'', done:false, type:'study' },
+    { id: uid(), start:'12:00', end:'18:50', title:'IFAL — Aulas', notes:'', done:false, type:'ifal' },
+    { id: uid(), start:'19:00', end:'20:50', title:'Academia', notes:'', done:false, type:'gym' },
+    { id: uid(), start:'22:00', end:'01:00', title:'Estudo Noturno', notes:'', done:false, type:'study' },
+    { id: uid(), start:'01:00', end:'05:30', title:'Dormir', notes:'', done:false, type:'sleep' },
+  ],
+  // 5 - Sábado
+  [
+    { id: uid(), start:'05:30', end:'07:00', title:'Corrida na Praça (TAF)', notes:'', done:false, type:'run' },
+    { id: uid(), start:'09:00', end:'11:50', title:'Estudo (Casa ou Casa da Vó)', notes:'', done:false, type:'study' },
+    { id: uid(), start:'14:20', end:'17:30', title:'Estudo Vespertino', notes:'Ou Horário Livre — definir nas observações', done:false, type:'study' },
+    { id: uid(), start:'19:00', end:'02:00', title:'Estudo Noturno ou Atividade Livre', notes:'Definir nas observações', done:false, type:'free' },
+  ],
+  // 6 - Domingo
+  [
+    { id: uid(), start:'08:00', end:'09:30', title:'Acordar mais tarde e Café da Manhã', notes:'', done:false, type:'meal' },
+    { id: uid(), start:'09:30', end:'12:00', title:'Estudo Matinal', notes:'', done:false, type:'study' },
+    { id: uid(), start:'14:00', end:'18:00', title:'Bloco Vespertino Livre / Estudo Alternativo', notes:'', done:false, type:'free' },
+    { id: uid(), start:'18:00', end:'23:00', title:'Bloco Noturno Livre / Organização', notes:'', done:false, type:'free' },
+    { id: uid(), start:'23:00', end:'06:00', title:'Dormir Mais Cedo', notes:'', done:false, type:'sleep' },
+  ],
+];
+
+function uid() { return Math.random().toString(36).slice(2,9) + Date.now().toString(36); }
+
+// ============================================================
+// STATE
+// ============================================================
+let routine = [];
+let notes = [];
+let currentDay = 0;
+let currentSection = 'rotina';
+let editingTask = null;
+let isAddingTask = false;
+
+// ============================================================
+// INIT
+// ============================================================
+function init() {
+  // Load or seed routine
+  const saved = localStorage.getItem(KEYS.rotina);
+  if (saved) {
+    routine = JSON.parse(saved);
+  } else {
+    routine = JSON.parse(JSON.stringify(DEFAULT_ROUTINE));
+    saveRoutine();
+  }
+  // Load notes
+  const savedNotes = localStorage.getItem(KEYS.notas);
+  notes = savedNotes ? JSON.parse(savedNotes) : [];
+
+  // Detect today (JS: 0=Sun,1=Mon...6=Sat → our: 0=Mon...6=Sun)
+  const jsDay = new Date().getDay();
+  currentDay = jsDay === 0 ? 6 : jsDay - 1;
+
+  renderDaySelector();
+  renderTasks();
+  renderNotes();
+  startCountdown();
+  showSection('rotina');
+}
+
+function saveRoutine() { localStorage.setItem(KEYS.rotina, JSON.stringify(routine)); }
+function saveNotes()   { localStorage.setItem(KEYS.notas,   JSON.stringify(notes)); }
+
+// ============================================================
+// NAV
+// ============================================================
+function showSection(name) {
+  currentSection = name;
+  ['rotina','edital','notas'].forEach(s => {
+    document.getElementById(`section-${s}`).classList.toggle('hidden', s !== name);
+    document.getElementById(`nav-${s}`).classList.toggle('active', s === name);
   });
 }
 
-// ─── DIARY ───────────────────────────────────────────────────────────────────
-function updateDiaryDate() {
-  const now = new Date();
-  document.getElementById('diary-today').textContent = now.toLocaleDateString('pt-BR', { weekday:'long', day:'numeric', month:'long' });
+// ============================================================
+// DAY SELECTOR
+// ============================================================
+function selectDay(d) {
+  currentDay = d;
+  renderDaySelector();
+  renderTasks();
 }
 
-function saveDiary() {
-  const text = document.getElementById('diary-input').value.trim();
-  if (!text) return;
-  const entry = {
-    id: Date.now(),
-    date: new Date().toLocaleString('pt-BR'),
-    text
-  };
-  diaryEntries.unshift(entry);
-  localStorage.setItem('pmal_hub_diary', JSON.stringify(diaryEntries));
-  document.getElementById('diary-input').value = '';
-  renderDiary();
-}
-
-function deleteDiaryEntry(id) {
-  diaryEntries = diaryEntries.filter(e => e.id !== id);
-  localStorage.setItem('pmal_hub_diary', JSON.stringify(diaryEntries));
-  renderDiary();
-}
-
-function clearAllDiary() {
-  if (!confirm('Apagar todas as notas?')) return;
-  diaryEntries = [];
-  localStorage.setItem('pmal_hub_diary', JSON.stringify(diaryEntries));
-  renderDiary();
-}
-
-function renderDiary() {
-  const container = document.getElementById('diary-entries');
-  if (!diaryEntries.length) {
-    container.innerHTML = '<p style="font-size:12px;color:var(--muted);text-align:center;padding:20px 0">Nenhuma nota ainda. Começa agora! 🚀</p>';
-    return;
+function renderDaySelector() {
+  for (let i = 0; i < 7; i++) {
+    const btn = document.getElementById(`day-${i}`);
+    btn.classList.toggle('active', i === currentDay);
   }
-  container.innerHTML = diaryEntries.map(e => `
-    <div class="diary-entry">
-      <div class="diary-entry-header">
-        <span class="diary-entry-date">📅 ${e.date}</span>
-        <button class="diary-entry-del" onclick="deleteDiaryEntry(${e.id})">✕</button>
+}
+
+// ============================================================
+// TASK LIST
+// ============================================================
+const TYPE_ICONS = {
+  sleep:'😴', study:'📚', ifal:'🏫', gym:'🏋️', run:'🏃', meal:'☕', free:'🌿'
+};
+
+function renderTasks() {
+  const tasks = routine[currentDay];
+  const list = document.getElementById('task-list');
+  list.innerHTML = '';
+
+  tasks.forEach(task => {
+    const card = document.createElement('div');
+    card.className = `task-card bg-white rounded-2xl p-4 shadow-sm border border-slate-100 flex items-start gap-3 ${task.type} ${task.done ? 'done' : ''}`;
+    card.innerHTML = `
+      <input type="checkbox" class="task-check mt-0.5" ${task.done ? 'checked' : ''} onchange="toggleTask('${task.id}', this.checked)">
+      <div class="flex-1 min-w-0">
+        <div class="flex items-center gap-1.5 mb-0.5">
+          <span class="text-xs font-mono text-slate-400">${task.start} — ${task.end}</span>
+          <span class="text-xs">${TYPE_ICONS[task.type] || '📌'}</span>
+        </div>
+        <div class="task-title text-sm font-semibold text-slate-700 leading-snug">${escHtml(task.title)}</div>
+        ${task.notes ? `<div class="text-xs text-slate-400 mt-1 leading-snug">${escHtml(task.notes)}</div>` : ''}
       </div>
-      <div class="diary-entry-text">${escapeHtml(e.text)}</div>
-    </div>
-  `).join('');
+      <button onclick="openEditModal('${task.id}')" class="text-slate-300 hover:text-blue-400 transition-colors text-lg leading-none mt-0.5 flex-shrink-0">✏️</button>
+    `;
+    list.appendChild(card);
+  });
+
+  updateProgress();
+  checkResetButton();
 }
 
-function escapeHtml(text) {
-  return text.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+function updateProgress() {
+  const tasks = routine[currentDay];
+  const done = tasks.filter(t => t.done).length;
+  const total = tasks.length;
+  const pct = total ? Math.round((done / total) * 100) : 0;
+  document.getElementById('progress-fill').style.width = pct + '%';
+  document.getElementById('progress-label').textContent = `${done} / ${total}`;
 }
 
-// ─── INIT ────────────────────────────────────────────────────────────────────
-(function init() {
-  updateCountdown();
-  setInterval(updateCountdown, 60000);
-  renderDayRow();
-  renderTimeline();
-  renderSubjectGrid();
-  renderStrategyCards();
-  updateDiaryDate();
-  renderDiary();
-})();
+function checkResetButton() {
+  const allDone = routine.every(day => day.every(t => t.done));
+  const resetBtn = document.getElementById('reset-week-btn');
+  resetBtn.classList.toggle('hidden', !allDone);
+}
+
+function toggleTask(id, checked) {
+  const task = findTask(id);
+  if (task) { task.done = checked; saveRoutine(); renderTasks(); }
+}
+
+function findTask(id) {
+  for (const day of routine) {
+    const t = day.find(t => t.id === id);
+    if (t) return t;
+  }
+  return null;
+}
+
+// ============================================================
+// MODAL — EDIT / ADD
+// ============================================================
+function openEditModal(id) {
+  const task = findTask(id);
+  if (!task) return;
+  isAddingTask = false;
+  editingTask = task;
+  document.getElementById('modal-title').textContent = 'Editar Tarefa';
+  document.getElementById('modal-task-id').value = id;
+  document.getElementById('modal-start').value = task.start;
+  document.getElementById('modal-end').value = task.end;
+  document.getElementById('modal-title-input').value = task.title;
+  document.getElementById('modal-notes').value = task.notes;
+  document.getElementById('modal-delete-btn').classList.remove('hidden');
+  document.getElementById('modal').classList.remove('hidden');
+}
+
+function openAddModal() {
+  isAddingTask = true;
+  editingTask = null;
+  document.getElementById('modal-title').textContent = 'Nova Tarefa';
+  document.getElementById('modal-task-id').value = '';
+  document.getElementById('modal-start').value = '';
+  document.getElementById('modal-end').value = '';
+  document.getElementById('modal-title-input').value = '';
+  document.getElementById('modal-notes').value = '';
+  document.getElementById('modal-delete-btn').classList.add('hidden');
+  document.getElementById('modal').classList.remove('hidden');
+  document.getElementById('modal-title-input').focus();
+}
+
+function closeModal() { document.getElementById('modal').classList.add('hidden'); }
+
+function saveModal() {
+  const start = document.getElementById('modal-start').value;
+  const end   = document.getElementById('modal-end').value;
+  const title = document.getElementById('modal-title-input').value.trim();
+  const notes = document.getElementById('modal-notes').value.trim();
+  if (!title) { document.getElementById('modal-title-input').focus(); return; }
+
+  if (isAddingTask) {
+    const newTask = { id: uid(), start, end, title, notes, done: false, type: detectType(title) };
+    routine[currentDay].push(newTask);
+    routine[currentDay].sort((a, b) => a.start.localeCompare(b.start));
+  } else {
+    const task = findTask(document.getElementById('modal-task-id').value);
+    if (task) { task.start = start; task.end = end; task.title = title; task.notes = notes; }
+  }
+
+  saveRoutine();
+  closeModal();
+  renderTasks();
+}
+
+function deleteTaskFromModal() {
+  const id = document.getElementById('modal-task-id').value;
+  for (let i = 0; i < 7; i++) {
+    const idx = routine[i].findIndex(t => t.id === id);
+    if (idx !== -1) { routine[i].splice(idx, 1); break; }
+  }
+  saveRoutine();
+  closeModal();
+  renderTasks();
+}
+
+function detectType(title) {
+  const t = title.toLowerCase();
+  if (t.includes('dormir')) return 'sleep';
+  if (t.includes('corrid') || t.includes('taf')) return 'run';
+  if (t.includes('ifal') || t.includes('aula')) return 'ifal';
+  if (t.includes('academia') || t.includes('muscula')) return 'gym';
+  if (t.includes('estudo') || t.includes('leitura') || t.includes('monitoria')) return 'study';
+  if (t.includes('café') || t.includes('acordar') || t.includes('arrumar') || t.includes('refeição')) return 'meal';
+  return 'free';
+}
+
+// ============================================================
+// RESET
+// ============================================================
+function openResetModal() { document.getElementById('reset-modal').classList.remove('hidden'); }
+function closeResetModal() { document.getElementById('reset-modal').classList.add('hidden'); }
+function confirmReset() {
+  routine.forEach(day => day.forEach(t => t.done = false));
+  saveRoutine();
+  closeResetModal();
+  renderTasks();
+}
+
+// ============================================================
+// NOTES
+// ============================================================
+const PRIORITY_CONFIG = {
+  leve:      { label: '🟢 Leve',      bg: 'bg-green-50',  border: 'border-green-200',  badge: 'bg-green-100 text-green-700' },
+  moderado:  { label: '🟡 Moderado',  bg: 'bg-amber-50',  border: 'border-amber-200',  badge: 'bg-amber-100 text-amber-700' },
+  importante:{ label: '🔴 Importante',bg: 'bg-red-50',    border: 'border-red-200',    badge: 'bg-red-100 text-red-700' },
+};
+
+function addNote() {
+  const text = document.getElementById('note-text').value.trim();
+  if (!text) { document.getElementById('note-text').focus(); return; }
+  const priority = document.getElementById('note-priority').value;
+  notes.unshift({ id: uid(), text, priority, createdAt: new Date().toLocaleDateString('pt-BR') });
+  document.getElementById('note-text').value = '';
+  saveNotes();
+  renderNotes();
+}
+
+function deleteNote(id) {
+  notes = notes.filter(n => n.id !== id);
+  saveNotes();
+  renderNotes();
+}
+
+function clearAllNotes() {
+  if (!confirm('Apagar todas as anotações?')) return;
+  notes = [];
+  saveNotes();
+  renderNotes();
+}
+
+function renderNotes() {
+  const list = document.getElementById('notes-list');
+  const empty = document.getElementById('notes-empty');
+  const actions = document.getElementById('notes-actions');
+  list.innerHTML = '';
+
+  if (notes.length === 0) { empty.classList.remove('hidden'); actions.classList.add('hidden'); return; }
+  empty.classList.add('hidden'); actions.classList.remove('hidden');
+
+  notes.forEach(note => {
+    const cfg = PRIORITY_CONFIG[note.priority];
+    const card = document.createElement('div');
+    card.className = `note-card ${cfg.bg} border ${cfg.border} rounded-2xl p-4 shadow-sm`;
+    card.innerHTML = `
+      <div class="flex items-start justify-between gap-2 mb-2">
+        <span class="text-[11px] font-semibold px-2 py-0.5 rounded-full ${cfg.badge}">${cfg.label}</span>
+        <div class="flex items-center gap-2">
+          <span class="text-[11px] text-slate-400 font-mono">${note.createdAt}</span>
+          <button onclick="deleteNote('${note.id}')" class="text-slate-300 hover:text-red-400 transition-colors text-sm">✕</button>
+        </div>
+      </div>
+      <p class="text-sm text-slate-700 leading-relaxed whitespace-pre-wrap">${escHtml(note.text)}</p>
+    `;
+    list.appendChild(card);
+  });
+}
+
+// ============================================================
+// COUNTDOWN
+// ============================================================
+function startCountdown() {
+  function tick() {
+    const now = new Date();
+    const diff = PROVA_DATE - now;
+    if (diff <= 0) {
+      ['cd-dias','cd-horas','cd-min','cd-seg'].forEach(id => document.getElementById(id).textContent = '00');
+      return;
+    }
+    const d = Math.floor(diff / 86400000);
+    const h = Math.floor((diff % 86400000) / 3600000);
+    const m = Math.floor((diff % 3600000) / 60000);
+    const s = Math.floor((diff % 60000) / 1000);
+    document.getElementById('cd-dias').textContent = String(d).padStart(2,'0');
+    document.getElementById('cd-horas').textContent = String(h).padStart(2,'0');
+    document.getElementById('cd-min').textContent = String(m).padStart(2,'0');
+    document.getElementById('cd-seg').textContent = String(s).padStart(2,'0');
+  }
+  tick();
+  setInterval(tick, 1000);
+}
+
+// ============================================================
+// UTILS
+// ============================================================
+function escHtml(str) {
+  return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+// close modal on overlay click
+document.getElementById('modal').addEventListener('click', function(e) {
+  if (e.target === this) closeModal();
+});
+document.getElementById('reset-modal').addEventListener('click', function(e) {
+  if (e.target === this) closeResetModal();
+});
+
+// Enter to save note
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape') { closeModal(); closeResetModal(); }
+});
+
+// ============================================================
+// BOOT
+// ============================================================
+init();
 </script>
 </body>
 </html>
