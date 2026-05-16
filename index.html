@@ -1,754 +1,1147 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>PMAL 2026 — Hub de Produtividade</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
-<script src="https://cdn.tailwindcss.com"></script>
-<script>
-  tailwind.config = {
-    theme: {
-      extend: {
-        fontFamily: {
-          sans: ['DM Sans', 'sans-serif'],
-          mono: ['DM Mono', 'monospace'],
-        },
-        colors: {
-          brand: {
-            50: '#eff6ff',
-            100: '#dbeafe',
-            200: '#bfdbfe',
-            400: '#60a5fa',
-            500: '#3b82f6',
-            600: '#2563eb',
-            700: '#1d4ed8',
-          }
-        }
-      }
-    }
-  }
-</script>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>RotinaPRO</title>
 <style>
-  * { -webkit-tap-highlight-color: transparent; }
-  body { font-family: 'DM Sans', sans-serif; background: #f8fafc; color: #1e293b; }
-
-  /* Nav */
-  .nav-btn { transition: all .2s ease; }
-  .nav-btn.active { background: #2563eb; color: #fff; }
-  .nav-btn:not(.active):hover { background: #e2e8f0; }
-
-  /* Day selector */
-  .day-btn { transition: all .2s ease; white-space: nowrap; }
-  .day-btn.active { background: #2563eb; color: #fff; box-shadow: 0 4px 14px rgba(37,99,235,.35); }
-  .day-btn:not(.active):hover { background: #e2e8f0; }
-
-  /* Task cards */
-  .task-card { transition: all .2s ease; border-left: 3px solid transparent; }
-  .task-card:hover { box-shadow: 0 4px 20px rgba(0,0,0,.08); transform: translateY(-1px); }
-  .task-card.done { opacity: .5; }
-  .task-card.done .task-title { text-decoration: line-through; color: #94a3b8; }
-  .task-card.sleep { border-left-color: #818cf8; background: linear-gradient(135deg,#f0f9ff,#f8fafc); }
-  .task-card.study { border-left-color: #34d399; }
-  .task-card.ifal  { border-left-color: #f59e0b; }
-  .task-card.gym   { border-left-color: #f472b6; }
-  .task-card.run   { border-left-color: #fb923c; }
-  .task-card.meal  { border-left-color: #a78bfa; }
-  .task-card.free  { border-left-color: #94a3b8; }
-
-  /* Progress bar */
-  .progress-fill { transition: width .5s cubic-bezier(.4,0,.2,1); }
-
-  /* Modal */
-  .modal-overlay { backdrop-filter: blur(4px); }
-  .modal-box { animation: modalIn .25s cubic-bezier(.34,1.56,.64,1); }
-  @keyframes modalIn { from { opacity:0; transform:scale(.92) translateY(12px); } to { opacity:1; transform:scale(1) translateY(0); } }
-
-  /* Note cards */
-  .note-card { animation: noteIn .3s cubic-bezier(.34,1.56,.64,1); }
-  @keyframes noteIn { from { opacity:0; transform:translateY(10px) scale(.96); } to { opacity:1; transform:none; } }
-
-  /* Countdown */
-  .cd-block { background: linear-gradient(135deg,#1e40af,#2563eb); }
-
-  /* TAF item */
-  .taf-item { transition: background .15s; }
-  .taf-item:hover { background: #eff6ff; }
-
-  /* Scrollbar */
-  ::-webkit-scrollbar { width: 4px; height: 4px; }
-  ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 99px; }
-
-  /* Checkbox custom */
-  .task-check { appearance: none; width: 18px; height: 18px; border: 2px solid #cbd5e1; border-radius: 50%; cursor: pointer; transition: all .2s; flex-shrink: 0; position: relative; }
-  .task-check:checked { background: #2563eb; border-color: #2563eb; }
-  .task-check:checked::after { content:''; position:absolute; left:4px; top:1px; width:5px; height:9px; border:2px solid #fff; border-top:none; border-left:none; transform:rotate(45deg); }
-
-  /* Section fade */
-  .section { animation: fadeIn .3s ease; }
-  @keyframes fadeIn { from { opacity:0; transform:translateY(6px); } to { opacity:1; transform:none; } }
-
-  /* Scroll days */
-  .days-scroll { scrollbar-width: none; }
-  .days-scroll::-webkit-scrollbar { display: none; }
-
-  /* Reset btn */
-  .reset-btn { background: linear-gradient(135deg,#f59e0b,#f97316); }
-  .reset-btn:hover { background: linear-gradient(135deg,#d97706,#ea580c); }
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:#f8f9fb;color:#1a1a2e;min-height:100vh}
+:root{--indigo:#4f46e5;--indigo-light:#eef2ff;--indigo-dark:#3730a3;--purple:#7c3aed;--green:#10b981;--orange:#f59e0b;--red:#ef4444;--yellow:#fbbf24;--gray:#6b7280;--border:#e5e7eb;--white:#fff;--card-shadow:0 1px 3px rgba(0,0,0,.08),0 1px 2px rgba(0,0,0,.05)}
+.hidden{display:none!important}
+/* HEADER */
+header{background:#fff;border-bottom:1px solid var(--border);position:sticky;top:0;z-index:100;padding:0 1rem}
+.header-inner{max-width:1100px;margin:0 auto;display:flex;align-items:center;gap:1rem;padding:.75rem 0}
+.logo{width:36px;height:36px;background:linear-gradient(135deg,#4f46e5,#7c3aed);border-radius:10px;display:flex;align-items:center;justify-content:center;color:#fff;font-weight:800;font-size:14px;flex-shrink:0}
+.logo-text h1{font-size:15px;font-weight:700;color:#111}
+.logo-text p{font-size:11px;color:#9ca3af}
+nav{display:flex;gap:2px;margin-left:auto;flex-wrap:wrap}
+.nav-btn{display:flex;align-items:center;gap:6px;padding:7px 12px;border-radius:10px;border:none;background:transparent;cursor:pointer;font-size:13px;color:#6b7280;transition:all .15s;white-space:nowrap}
+.nav-btn:hover{background:#f3f4f6;color:#374151}
+.nav-btn.active{background:#eef2ff;color:#4f46e5;font-weight:600}
+.header-right{display:flex;align-items:center;gap:8px;flex-shrink:0}
+.xp-badge{display:flex;align-items:center;gap:6px;background:#f5f3ff;border:1px solid #ddd6fe;border-radius:10px;padding:5px 10px;font-size:12px;color:#7c3aed}
+.xp-bar{width:50px;height:5px;background:#ddd6fe;border-radius:99px;overflow:hidden}
+.xp-fill{height:100%;background:#7c3aed;border-radius:99px;transition:width .4s}
+.streak-badge{display:flex;align-items:center;gap:4px;background:#fff7ed;border:1px solid #fed7aa;border-radius:10px;padding:5px 10px;font-size:12px;color:#ea580c;font-weight:600}
+.focus-btn{background:var(--indigo);color:#fff;border:none;padding:8px 14px;border-radius:10px;cursor:pointer;font-size:13px;font-weight:600;transition:background .15s}
+.focus-btn:hover{background:var(--indigo-dark)}
+/* MAIN */
+main{max-width:1100px;margin:0 auto;padding:1.5rem 1rem}
+/* CARDS */
+.card{background:#fff;border-radius:16px;border:1px solid var(--border);box-shadow:var(--card-shadow);padding:1.25rem}
+.card-title{font-size:15px;font-weight:700;color:#111;margin-bottom:1rem}
+/* GRID */
+.grid-2{display:grid;grid-template-columns:repeat(2,1fr);gap:1rem}
+.grid-3{display:grid;grid-template-columns:repeat(3,1fr);gap:1rem}
+.grid-4{display:grid;grid-template-columns:repeat(4,1fr);gap:1rem}
+@media(max-width:700px){.grid-2,.grid-3,.grid-4{grid-template-columns:1fr}.hide-mobile{display:none}}
+/* STAT CARDS */
+.stat-card{border-radius:14px;padding:1rem;color:#fff;position:relative;overflow:hidden}
+.stat-card .stat-icon{font-size:24px;margin-bottom:4px}
+.stat-card .stat-value{font-size:24px;font-weight:800;line-height:1}
+.stat-card .stat-label{font-size:11px;opacity:.8;margin-top:2px}
+.stat-card .stat-sub{font-size:10px;opacity:.6;margin-top:1px}
+/* MOTIVATIONAL */
+.motiv-bar{background:linear-gradient(135deg,#4f46e5,#7c3aed);border-radius:14px;padding:1rem 1.25rem;color:#fff;font-size:14px;font-weight:500;margin-bottom:1.25rem;transition:all .5s}
+/* ENERGY */
+.energy-box{background:linear-gradient(135deg,#eef2ff,#f5f3ff);border:1px solid #c7d2fe;border-radius:14px;padding:1rem 1.25rem;margin-bottom:1.25rem}
+.energy-box h3{font-size:14px;font-weight:700;margin-bottom:.75rem;color:#374151}
+.energy-btns{display:flex;gap:.5rem}
+.energy-btn{flex:1;padding:.6rem;border-radius:10px;border:1px solid;cursor:pointer;font-size:13px;font-weight:600;transition:all .15s}
+.energy-btn:hover{transform:translateY(-1px)}
+/* TABS */
+.tabs{display:flex;gap:2px;background:#f3f4f6;border-radius:12px;padding:3px;margin-bottom:1rem}
+.tab{flex:1;padding:7px 10px;border-radius:9px;border:none;background:transparent;cursor:pointer;font-size:12px;color:#6b7280;transition:all .15s;text-align:center;font-weight:500}
+.tab.active{background:#fff;color:#4f46e5;font-weight:700;box-shadow:0 1px 3px rgba(0,0,0,.1)}
+/* TASK CARD */
+.task-card{border-radius:12px;border:1px solid;padding:.65rem .9rem;margin-bottom:6px;cursor:pointer;transition:all .15s}
+.task-card:hover{box-shadow:0 2px 8px rgba(0,0,0,.08);transform:translateY(-1px)}
+.task-card.done{opacity:.5}
+.task-header{display:flex;align-items:center;gap:.6rem}
+.task-check{width:20px;height:20px;border-radius:50%;border:2px solid #d1d5db;display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:all .15s;cursor:pointer;background:#fff}
+.task-check.checked{background:#10b981;border-color:#10b981}
+.task-check svg{display:none}
+.task-check.checked svg{display:block}
+.task-title-text{font-size:13px;font-weight:600;flex:1}
+.task-time{font-size:11px;color:#9ca3af;font-family:monospace}
+.priority-badge{font-size:10px;padding:2px 7px;border-radius:99px;border:1px solid;font-weight:600}
+.task-body{margin-top:.65rem;padding-top:.65rem;border-top:1px solid rgba(0,0,0,.06)}
+.task-notes{font-size:12px;color:#6b7280;background:rgba(255,255,255,.6);border-radius:8px;padding:.5rem;border:1px solid rgba(255,255,255,.8);margin-bottom:.5rem;white-space:pre-wrap}
+.btn{display:inline-flex;align-items:center;gap:5px;padding:6px 12px;border-radius:9px;border:1px solid;cursor:pointer;font-size:12px;font-weight:600;transition:all .15s}
+.btn:hover{transform:translateY(-1px)}
+.btn-primary{background:#4f46e5;color:#fff;border-color:#4f46e5}
+.btn-primary:hover{background:#3730a3}
+.btn-sm{padding:5px 10px;font-size:11px}
+.btn-danger{background:#fef2f2;color:#ef4444;border-color:#fecaca}
+.btn-ghost{background:#f9fafb;color:#374151;border-color:#e5e7eb}
+.btn-orange{background:#f97316;color:#fff;border-color:#f97316}
+.btn-orange:hover{background:#ea580c}
+/* FORM */
+input,textarea,select{width:100%;padding:.55rem .8rem;border:1px solid #d1d5db;border-radius:9px;font-size:13px;outline:none;transition:border .15s;font-family:inherit;background:#fff;color:#111}
+input:focus,textarea:focus,select:focus{border-color:#4f46e5;box-shadow:0 0 0 3px rgba(79,70,229,.1)}
+textarea{resize:vertical}
+label{font-size:12px;color:#6b7280;display:block;margin-bottom:4px;font-weight:500}
+.form-row{display:flex;gap:.75rem}
+.form-row>*{flex:1}
+.form-group{margin-bottom:.75rem}
+/* PROGRESS */
+.progress-bar{width:100%;height:8px;background:#f3f4f6;border-radius:99px;overflow:hidden}
+.progress-fill{height:100%;border-radius:99px;transition:width .4s}
+/* NOTES */
+.note-card{border-radius:12px;padding:1rem;border:1px solid rgba(0,0,0,.08);position:relative}
+.note-card h4{font-size:13px;font-weight:700;margin-bottom:.35rem;color:#111}
+.note-card p{font-size:12px;color:#6b7280;white-space:pre-wrap}
+.note-pin{position:absolute;top:.75rem;right:.75rem;font-size:14px}
+/* POMODORO */
+.pomo-circle{position:relative;display:flex;align-items:center;justify-content:center}
+.pomo-time{position:absolute;text-align:center}
+.pomo-time span{display:block;font-size:32px;font-weight:800;letter-spacing:-1px;color:#111;font-family:monospace}
+.pomo-time small{font-size:11px;color:#9ca3af}
+/* HABIT */
+.habit-row{display:flex;align-items:center;gap:.75rem;padding:.5rem 0;border-bottom:1px solid #f3f4f6}
+.habit-row:last-child{border-bottom:none}
+.habit-emoji{width:34px;height:34px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:18px;cursor:pointer;transition:all .15s;flex-shrink:0}
+.habit-name{font-size:13px;color:#374151;flex:1}
+.habit-name.done{text-decoration:line-through;color:#9ca3af}
+.habit-dots{display:flex;gap:3px}
+.habit-dot{width:14px;height:14px;border-radius:4px}
+/* FOCUS MODE */
+#focus-overlay{position:fixed;inset:0;background:#0f0f1a;z-index:1000;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1.5rem}
+#focus-overlay.hidden{display:none!important}
+.focus-label{color:#6366f1;font-size:11px;letter-spacing:.15em;text-transform:uppercase;font-weight:600}
+.focus-task-input{background:transparent;border:none;border-bottom:1px solid #374151;color:#fff;font-size:22px;font-weight:300;text-align:center;width:360px;padding:.5rem;outline:none}
+.focus-task-input::placeholder{color:#374151}
+.focus-task-input:focus{border-bottom-color:#6366f1}
+.focus-time{font-size:64px;font-weight:200;color:#fff;font-family:monospace;letter-spacing:-2px}
+.focus-sounds{display:flex;gap:.5rem}
+.sound-btn{padding:7px 14px;border-radius:10px;border:1px solid #374151;background:transparent;color:#6b7280;cursor:pointer;font-size:12px;transition:all .15s}
+.sound-btn.active{background:#1e1b4b;border-color:#6366f1;color:#a5b4fc}
+.focus-exit{position:absolute;top:1.25rem;right:1.25rem;background:transparent;border:1px solid #374151;color:#6b7280;padding:7px 14px;border-radius:9px;cursor:pointer;font-size:12px}
+.focus-exit:hover{border-color:#6b7280;color:#9ca3af}
+/* AI CHAT */
+.chat-box{height:420px;overflow-y:auto;display:flex;flex-direction:column;gap:.75rem;padding:.5rem 0;scroll-behavior:smooth}
+.chat-msg{max-width:85%;border-radius:14px;padding:.75rem 1rem;font-size:13px;line-height:1.6;white-space:pre-wrap}
+.chat-msg.user{align-self:flex-end;background:#4f46e5;color:#fff;border-bottom-right-radius:4px}
+.chat-msg.ai{align-self:flex-start;background:#f3f4f6;color:#374151;border-bottom-left-radius:4px;border:1px solid #e5e7eb}
+.chat-input-row{display:flex;gap:.5rem;margin-top:.75rem}
+.chat-input-row input{flex:1}
+.chat-suggestions{display:flex;gap:.5rem;flex-wrap:wrap;margin-bottom:.75rem}
+.chat-sug{padding:5px 11px;border-radius:99px;border:1px solid #c7d2fe;background:#eef2ff;color:#4f46e5;font-size:11px;cursor:pointer;transition:all .15s}
+.chat-sug:hover{background:#e0e7ff}
+.typing{display:flex;gap:4px;align-items:center;padding:.75rem 1rem;background:#f3f4f6;border-radius:14px;border-bottom-left-radius:4px;align-self:flex-start}
+.typing span{width:7px;height:7px;background:#9ca3af;border-radius:50%;animation:bounce .9s infinite}
+.typing span:nth-child(2){animation-delay:.15s}
+.typing span:nth-child(3){animation-delay:.3s}
+@keyframes bounce{0%,60%,100%{transform:translateY(0)}30%{transform:translateY(-6px)}}
+/* DAY TABS */
+.day-tabs{display:flex;gap:4px;overflow-x:auto;padding-bottom:4px;margin-bottom:1rem}
+.day-tab{flex-shrink:0;padding:7px 14px;border-radius:10px;border:1px solid #e5e7eb;background:#fff;cursor:pointer;font-size:12px;font-weight:600;color:#6b7280;transition:all .15s;text-align:center}
+.day-tab:hover{border-color:#a5b4fc;color:#4f46e5}
+.day-tab.active{background:#4f46e5;color:#fff;border-color:#4f46e5}
+.day-tab.today{box-shadow:0 0 0 2px #a5b4fc}
+.day-tab .day-pct{font-size:10px;opacity:.7;display:block}
+/* SCROLLBAR */
+::-webkit-scrollbar{width:5px;height:5px}
+::-webkit-scrollbar-track{background:transparent}
+::-webkit-scrollbar-thumb{background:#d1d5db;border-radius:99px}
+/* COLOR PICKERS */
+.color-pick{width:22px;height:22px;border-radius:50%;border:2px solid transparent;cursor:pointer;transition:border .15s}
+.color-pick.active{border-color:#4f46e5}
+/* SECTION */
+.section{margin-bottom:1.25rem}
+/* TAG */
+.tag{display:inline-block;padding:2px 8px;border-radius:99px;font-size:11px;font-weight:600;border:1px solid}
 </style>
 </head>
-<body class="min-h-screen pb-24">
+<body>
 
-<!-- TOP HEADER -->
-<header class="sticky top-0 z-40 bg-white/90 backdrop-blur-md border-b border-slate-100 shadow-sm">
-  <div class="max-w-2xl mx-auto px-4 py-3 flex items-center justify-between gap-3">
-    <div class="flex items-center gap-2">
-      <div class="w-8 h-8 rounded-xl bg-blue-600 flex items-center justify-center text-white text-sm font-bold shadow">P</div>
-      <div>
-        <div class="font-semibold text-slate-800 leading-tight text-sm">PMAL 2026</div>
-        <div class="text-[10px] text-slate-400 leading-tight font-mono">Hub de Produtividade</div>
-      </div>
+<!-- FOCUS OVERLAY -->
+<div id="focus-overlay" class="hidden">
+  <button class="focus-exit" onclick="toggleFocus(false)">✕ Sair do foco</button>
+  <div class="focus-label">Modo Foco</div>
+  <input id="focus-task" class="focus-task-input" placeholder="Qual é o objetivo agora?"/>
+  <div class="focus-time" id="focus-display">50:00</div>
+  <div style="display:flex;gap:.75rem">
+    <button onclick="toggleFocusTimer()" id="focus-play-btn" style="padding:12px 32px;border-radius:14px;background:#6366f1;color:#fff;border:none;cursor:pointer;font-size:15px;font-weight:700">▶ Iniciar</button>
+    <button onclick="resetFocusTimer()" style="padding:12px 16px;border-radius:14px;background:transparent;color:#6b7280;border:1px solid #374151;cursor:pointer;font-size:16px">↺</button>
+  </div>
+  <div class="focus-sounds">
+    <button class="sound-btn active" onclick="setSound('none',this)">🔇 Silêncio</button>
+    <button class="sound-btn" onclick="setSound('lofi',this)">🎵 Lo-fi</button>
+    <button class="sound-btn" onclick="setSound('rain',this)">🌧 Chuva</button>
+  </div>
+</div>
+
+<!-- HEADER -->
+<header>
+  <div class="header-inner">
+    <div class="logo">R</div>
+    <div class="logo-text">
+      <h1>RotinaPRO</h1>
+      <p>Sistema de produtividade</p>
     </div>
-    <nav class="flex gap-1 bg-slate-100 p-1 rounded-xl">
-      <button onclick="showSection('rotina')" id="nav-rotina" class="nav-btn active text-xs font-medium px-3 py-1.5 rounded-lg">📅 Rotina</button>
-      <button onclick="showSection('edital')" id="nav-edital" class="nav-btn text-xs font-medium px-3 py-1.5 rounded-lg">📋 Edital</button>
-      <button onclick="showSection('notas')" id="nav-notas" class="nav-btn text-xs font-medium px-3 py-1.5 rounded-lg">📓 Notas</button>
+    <nav id="main-nav">
+      <button class="nav-btn active" onclick="goTab('dashboard')">🏠 <span>Dashboard</span></button>
+      <button class="nav-btn" onclick="goTab('rotina')">📅 <span>Rotina</span></button>
+      <button class="nav-btn" onclick="goTab('estudos')">📚 <span>Estudos</span></button>
+      <button class="nav-btn" onclick="goTab('notas')">📝 <span>Notas</span></button>
+      <button class="nav-btn" onclick="goTab('taf')">🏃 <span>TAF</span></button>
+      <button class="nav-btn" onclick="goTab('metas')">🎯 <span>Metas</span></button>
+      <button class="nav-btn" onclick="goTab('ia')">🤖 <span>IA</span></button>
     </nav>
+    <div class="header-right">
+      <div class="xp-badge hide-mobile">
+        <span id="level-label">Nv.1</span>
+        <div class="xp-bar"><div class="xp-fill" id="xp-fill" style="width:0%"></div></div>
+        <span id="xp-label">0xp</span>
+      </div>
+      <div class="streak-badge">🔥 <span id="streak-val">0</span></div>
+      <button class="focus-btn" onclick="toggleFocus(true)">🎯 Foco</button>
+    </div>
   </div>
 </header>
 
-<!-- ======================== SECTION: ROTINA ======================== -->
-<section id="section-rotina" class="section max-w-2xl mx-auto px-4 pt-4">
-
-  <!-- Day selector -->
-  <div class="days-scroll flex gap-2 overflow-x-auto pb-2 mb-4">
-    <button onclick="selectDay(0)" id="day-0" class="day-btn text-xs font-semibold px-4 py-2 rounded-full bg-white border border-slate-200 shadow-sm">Seg</button>
-    <button onclick="selectDay(1)" id="day-1" class="day-btn text-xs font-semibold px-4 py-2 rounded-full bg-white border border-slate-200 shadow-sm">Ter</button>
-    <button onclick="selectDay(2)" id="day-2" class="day-btn text-xs font-semibold px-4 py-2 rounded-full bg-white border border-slate-200 shadow-sm">Qua</button>
-    <button onclick="selectDay(3)" id="day-3" class="day-btn text-xs font-semibold px-4 py-2 rounded-full bg-white border border-slate-200 shadow-sm">Qui</button>
-    <button onclick="selectDay(4)" id="day-4" class="day-btn text-xs font-semibold px-4 py-2 rounded-full bg-white border border-slate-200 shadow-sm">Sex</button>
-    <button onclick="selectDay(5)" id="day-5" class="day-btn text-xs font-semibold px-4 py-2 rounded-full bg-white border border-slate-200 shadow-sm">Sáb</button>
-    <button onclick="selectDay(6)" id="day-6" class="day-btn text-xs font-semibold px-4 py-2 rounded-full bg-white border border-slate-200 shadow-sm">Dom</button>
-  </div>
-
-  <!-- Progress bar -->
-  <div id="progress-area" class="bg-white rounded-2xl p-4 shadow-sm border border-slate-100 mb-4">
-    <div class="flex items-center justify-between mb-2">
-      <span class="text-xs font-semibold text-slate-500 uppercase tracking-wide">Progresso do Dia</span>
-      <span id="progress-label" class="text-xs font-mono font-semibold text-blue-600">0 / 0</span>
-    </div>
-    <div class="h-2 bg-slate-100 rounded-full overflow-hidden">
-      <div id="progress-fill" class="progress-fill h-full bg-gradient-to-r from-blue-500 to-blue-400 rounded-full" style="width:0%"></div>
+<main>
+  <!-- ENERGY CHECK-IN -->
+  <div id="energy-box" class="energy-box">
+    <h3>⚡ Como está sua energia hoje?</h3>
+    <div class="energy-btns">
+      <button class="energy-btn" style="background:#eff6ff;color:#1d4ed8;border-color:#bfdbfe" onclick="setEnergy('cansado',this)">😴 Cansado</button>
+      <button class="energy-btn" style="background:#f0fdf4;color:#15803d;border-color:#bbf7d0" onclick="setEnergy('normal',this)">😊 Normal</button>
+      <button class="energy-btn" style="background:#fff7ed;color:#c2410c;border-color:#fed7aa" onclick="setEnergy('focado',this)">🔥 Focado</button>
     </div>
   </div>
 
-  <!-- Task list -->
-  <div id="task-list" class="space-y-2 mb-4"></div>
+  <!-- MOTIVATIONAL -->
+  <div class="motiv-bar" id="motiv-bar">💪 Carregando...</div>
 
-  <!-- Add task + Reset buttons -->
-  <div class="flex gap-2 mb-4">
-    <button onclick="openAddModal()" class="flex-1 flex items-center justify-center gap-2 bg-white border border-dashed border-blue-300 text-blue-600 text-sm font-medium py-3 rounded-xl hover:bg-blue-50 transition-colors">
-      <span class="text-lg leading-none">+</span> Adicionar Tarefa
-    </button>
-    <button onclick="openResetModal()" id="reset-week-btn" class="reset-btn text-white text-sm font-semibold px-4 py-3 rounded-xl shadow-sm transition-all hover:shadow-md hidden">
-      🔄 Reset
-    </button>
-  </div>
-
-</section>
-
-<!-- ======================== SECTION: EDITAL ======================== -->
-<section id="section-edital" class="section hidden max-w-2xl mx-auto px-4 pt-4 space-y-4">
-
-  <!-- Countdown -->
-  <div class="cd-block rounded-2xl p-5 text-white shadow-md">
-    <div class="text-xs font-mono uppercase tracking-widest opacity-70 mb-3">Contagem Regressiva — Prova PMAL</div>
-    <div class="flex gap-3 mb-3">
-      <div class="flex-1 text-center">
-        <div id="cd-dias" class="text-4xl font-bold font-mono">--</div>
-        <div class="text-[10px] uppercase tracking-widest opacity-60 mt-1">Dias</div>
-      </div>
-      <div class="flex-1 text-center">
-        <div id="cd-horas" class="text-4xl font-bold font-mono">--</div>
-        <div class="text-[10px] uppercase tracking-widest opacity-60 mt-1">Horas</div>
-      </div>
-      <div class="flex-1 text-center">
-        <div id="cd-min" class="text-4xl font-bold font-mono">--</div>
-        <div class="text-[10px] uppercase tracking-widest opacity-60 mt-1">Min</div>
-      </div>
-      <div class="flex-1 text-center">
-        <div id="cd-seg" class="text-4xl font-bold font-mono">--</div>
-        <div class="text-[10px] uppercase tracking-widest opacity-60 mt-1">Seg</div>
-      </div>
-    </div>
-    <div class="text-xs opacity-60 font-mono">📅 Data da Prova: 19 de Julho de 2026</div>
-  </div>
-
-  <!-- Vagas -->
-  <div class="bg-white rounded-2xl p-5 shadow-sm border border-slate-100">
-    <div class="text-xs font-semibold uppercase tracking-widest text-slate-400 mb-3">Resumo das Vagas</div>
-    <div class="grid grid-cols-3 gap-3">
-      <div class="bg-blue-50 rounded-xl p-3 text-center">
-        <div class="text-2xl font-bold text-blue-600 font-mono">500</div>
-        <div class="text-[11px] text-slate-500 mt-1">Imediatas</div>
-      </div>
-      <div class="bg-amber-50 rounded-xl p-3 text-center">
-        <div class="text-2xl font-bold text-amber-600 font-mono">500</div>
-        <div class="text-[11px] text-slate-500 mt-1">Cadastro Res.</div>
-      </div>
-      <div class="bg-green-50 rounded-xl p-3 text-center">
-        <div class="text-2xl font-bold text-green-600 font-mono">1.000</div>
-        <div class="text-[11px] text-slate-500 mt-1">Total</div>
-      </div>
-    </div>
-    <div class="mt-3 text-xs text-slate-500 bg-slate-50 rounded-xl p-3">
-      🎯 <strong>Cargo:</strong> Soldado Combatente — Masculino
-    </div>
-  </div>
-
-  <!-- TAF -->
-  <div class="bg-white rounded-2xl p-5 shadow-sm border border-slate-100">
-    <div class="text-xs font-semibold uppercase tracking-widest text-slate-400 mb-3">Metas do TAF — Masculino</div>
-    <div class="space-y-2">
-      <div class="taf-item flex items-center justify-between p-3 rounded-xl">
-        <div class="flex items-center gap-2">
-          <span class="text-lg">🏃</span>
-          <div>
-            <div class="text-sm font-semibold text-slate-700">Corrida 2.000m</div>
-            <div class="text-xs text-slate-400">Resistência aeróbica</div>
+  <!-- TABS CONTENT -->
+  <div id="tab-dashboard">
+    <div class="grid-4 section" id="stat-cards"></div>
+    <div style="display:grid;grid-template-columns:1fr 300px;gap:1rem;margin-bottom:1rem" id="today-grid">
+      <div class="card" id="today-card">
+        <div style="display:flex;align-items:center;justify-content:between;margin-bottom:.75rem">
+          <div style="flex:1">
+            <div class="card-title" style="margin-bottom:2px" id="today-title">Hoje</div>
+            <div style="font-size:12px;color:#9ca3af" id="today-sub">0/0 tarefas</div>
           </div>
+          <div class="progress-bar" style="width:80px"><div class="progress-fill" style="background:#4f46e5" id="today-prog"></div></div>
         </div>
-        <div class="text-sm font-bold text-blue-600 font-mono bg-blue-50 px-3 py-1 rounded-full">≤ 11min</div>
+        <div id="today-tasks-list" style="max-height:280px;overflow-y:auto"></div>
       </div>
-      <div class="taf-item flex items-center justify-between p-3 rounded-xl">
-        <div class="flex items-center gap-2">
-          <span class="text-lg">💪</span>
-          <div>
-            <div class="text-sm font-semibold text-slate-700">Abdominal</div>
-            <div class="text-xs text-slate-400">1 minuto</div>
-          </div>
-        </div>
-        <div class="text-sm font-bold text-green-600 font-mono bg-green-50 px-3 py-1 rounded-full">≥ 40 rep</div>
-      </div>
-      <div class="taf-item flex items-center justify-between p-3 rounded-xl">
-        <div class="flex items-center gap-2">
-          <span class="text-lg">🤸</span>
-          <div>
-            <div class="text-sm font-semibold text-slate-700">Barra Fixa</div>
-            <div class="text-xs text-slate-400">Força</div>
-          </div>
-        </div>
-        <div class="text-sm font-bold text-green-600 font-mono bg-green-50 px-3 py-1 rounded-full">≥ 4 rep</div>
-      </div>
-      <div class="taf-item flex items-center justify-between p-3 rounded-xl">
-        <div class="flex items-center gap-2">
-          <span class="text-lg">⚡</span>
-          <div>
-            <div class="text-sm font-semibold text-slate-700">Shuttle Run</div>
-            <div class="text-xs text-slate-400">Velocidade / Agilidade</div>
-          </div>
-        </div>
-        <div class="text-sm font-bold text-blue-600 font-mono bg-blue-50 px-3 py-1 rounded-full">≤ 11s</div>
-      </div>
-      <div class="taf-item flex items-center justify-between p-3 rounded-xl">
-        <div class="flex items-center gap-2">
-          <span class="text-lg">🏊</span>
-          <div>
-            <div class="text-sm font-semibold text-slate-700">Natação 50m</div>
-            <div class="text-xs text-slate-400">Resistência aquática</div>
-          </div>
-        </div>
-        <div class="text-sm font-bold text-blue-600 font-mono bg-blue-50 px-3 py-1 rounded-full">≤ 1min 5s</div>
-      </div>
+      <div id="pomo-card"></div>
     </div>
-  </div>
-
-</section>
-
-<!-- ======================== SECTION: NOTAS ======================== -->
-<section id="section-notas" class="section hidden max-w-2xl mx-auto px-4 pt-4">
-
-  <!-- Add note form -->
-  <div class="bg-white rounded-2xl p-4 shadow-sm border border-slate-100 mb-4">
-    <div class="text-xs font-semibold uppercase tracking-widest text-slate-400 mb-3">Nova Anotação</div>
-    <textarea id="note-text" rows="3" placeholder="Escreva sua anotação aqui..." class="w-full text-sm text-slate-700 bg-slate-50 border border-slate-200 rounded-xl p-3 resize-none outline-none focus:ring-2 focus:ring-blue-200 focus:border-blue-400 transition placeholder-slate-300"></textarea>
-    <div class="flex items-center gap-2 mt-3">
-      <select id="note-priority" class="flex-1 text-sm bg-slate-50 border border-slate-200 rounded-xl p-2.5 outline-none focus:ring-2 focus:ring-blue-200 focus:border-blue-400 transition">
-        <option value="leve">🟢 Leve</option>
-        <option value="moderado">🟡 Moderado</option>
-        <option value="importante">🔴 Importante</option>
-      </select>
-      <button onclick="addNote()" class="bg-blue-600 text-white text-sm font-semibold px-5 py-2.5 rounded-xl hover:bg-blue-700 transition-colors shadow-sm">Adicionar</button>
-    </div>
-  </div>
-
-  <!-- Notes actions -->
-  <div id="notes-actions" class="hidden flex justify-end mb-3">
-    <button onclick="clearAllNotes()" class="text-xs text-red-400 hover:text-red-600 transition-colors font-medium">🗑 Limpar todas</button>
-  </div>
-
-  <!-- Notes list -->
-  <div id="notes-list" class="space-y-3"></div>
-  <div id="notes-empty" class="text-center py-12 text-slate-400">
-    <div class="text-4xl mb-3">📓</div>
-    <div class="text-sm">Nenhuma anotação ainda.<br>Adicione sua primeira nota acima.</div>
-  </div>
-
-</section>
-
-<!-- ======================== MODAL ======================== -->
-<div id="modal" class="hidden fixed inset-0 z-50 modal-overlay bg-black/40 flex items-end sm:items-center justify-center p-4">
-  <div class="modal-box bg-white rounded-2xl w-full max-w-md shadow-2xl overflow-hidden">
-    <div class="px-5 py-4 border-b border-slate-100 flex items-center justify-between">
-      <h3 id="modal-title" class="font-semibold text-slate-800">Editar Tarefa</h3>
-      <button onclick="closeModal()" class="w-8 h-8 flex items-center justify-center rounded-full hover:bg-slate-100 text-slate-400 transition">✕</button>
-    </div>
-    <div class="p-5 space-y-3">
-      <input type="hidden" id="modal-task-id">
-      <div class="grid grid-cols-2 gap-3">
-        <div>
-          <label class="text-xs font-medium text-slate-500 mb-1 block">Início</label>
-          <input id="modal-start" type="time" class="w-full text-sm bg-slate-50 border border-slate-200 rounded-xl p-2.5 outline-none focus:ring-2 focus:ring-blue-200 focus:border-blue-400 transition">
-        </div>
-        <div>
-          <label class="text-xs font-medium text-slate-500 mb-1 block">Término</label>
-          <input id="modal-end" type="time" class="w-full text-sm bg-slate-50 border border-slate-200 rounded-xl p-2.5 outline-none focus:ring-2 focus:ring-blue-200 focus:border-blue-400 transition">
-        </div>
-      </div>
+    <div class="card section" id="habit-card-dash"></div>
+    <div class="card section" style="display:flex;align-items:center;justify-content:space-between;background:linear-gradient(135deg,#fffbeb,#fef3c7);border-color:#fde68a">
       <div>
-        <label class="text-xs font-medium text-slate-500 mb-1 block">Título</label>
-        <input id="modal-title-input" type="text" class="w-full text-sm bg-slate-50 border border-slate-200 rounded-xl p-2.5 outline-none focus:ring-2 focus:ring-blue-200 focus:border-blue-400 transition">
+        <div style="font-weight:700;color:#92400e;font-size:14px">↺ Resetar semana</div>
+        <div style="font-size:12px;color:#b45309;margin-top:2px">Desmarcar todas as tarefas e começar nova semana (+100xp)</div>
       </div>
-      <div>
-        <label class="text-xs font-medium text-slate-500 mb-1 block">Observações / Planejamento</label>
-        <textarea id="modal-notes" rows="3" class="w-full text-sm bg-slate-50 border border-slate-200 rounded-xl p-2.5 resize-none outline-none focus:ring-2 focus:ring-blue-200 focus:border-blue-400 transition placeholder-slate-300" placeholder="Detalhe seu plano aqui..."></textarea>
-      </div>
-    </div>
-    <div class="px-5 pb-5 flex gap-2">
-      <button id="modal-delete-btn" onclick="deleteTaskFromModal()" class="px-4 py-2.5 text-sm font-medium text-red-500 hover:bg-red-50 rounded-xl transition">Excluir</button>
-      <div class="flex-1"></div>
-      <button onclick="closeModal()" class="px-4 py-2.5 text-sm font-medium text-slate-500 hover:bg-slate-100 rounded-xl transition">Cancelar</button>
-      <button onclick="saveModal()" class="px-5 py-2.5 text-sm font-semibold bg-blue-600 text-white rounded-xl hover:bg-blue-700 transition shadow-sm">Salvar</button>
+      <button class="btn btn-orange" onclick="resetWeek()">Resetar semana</button>
     </div>
   </div>
-</div>
 
-<!-- RESET CONFIRM MODAL -->
-<div id="reset-modal" class="hidden fixed inset-0 z-50 modal-overlay bg-black/40 flex items-center justify-center p-4">
-  <div class="modal-box bg-white rounded-2xl w-full max-w-sm shadow-2xl p-6 text-center">
-    <div class="text-4xl mb-3">🔄</div>
-    <h3 class="font-bold text-slate-800 text-lg mb-2">Reiniciar Ciclo Semanal?</h3>
-    <p class="text-sm text-slate-500 mb-5">Todas as tarefas serão desmarcadas. Horários e observações serão mantidos.</p>
-    <div class="flex gap-3">
-      <button onclick="closeResetModal()" class="flex-1 py-2.5 text-sm font-medium text-slate-600 bg-slate-100 rounded-xl hover:bg-slate-200 transition">Cancelar</button>
-      <button onclick="confirmReset()" class="flex-1 py-2.5 text-sm font-semibold text-white reset-btn rounded-xl shadow-sm transition">Reiniciar!</button>
+  <div id="tab-rotina" class="hidden">
+    <div class="day-tabs" id="day-tabs"></div>
+    <div id="rotina-content"></div>
+  </div>
+
+  <div id="tab-estudos" class="hidden" id="tab-estudos">
+    <div id="estudos-content"></div>
+  </div>
+
+  <div id="tab-notas" class="hidden">
+    <div id="notas-content"></div>
+  </div>
+
+  <div id="tab-taf" class="hidden">
+    <div id="taf-content"></div>
+  </div>
+
+  <div id="tab-metas" class="hidden">
+    <div id="metas-content"></div>
+  </div>
+
+  <div id="tab-ia" class="hidden">
+    <div class="card">
+      <div style="display:flex;align-items:center;gap:.75rem;margin-bottom:1rem;padding-bottom:1rem;border-bottom:1px solid #f3f4f6">
+        <div style="width:42px;height:42px;border-radius:12px;background:linear-gradient(135deg,#4f46e5,#7c3aed);display:flex;align-items:center;justify-content:center;font-size:22px">🤖</div>
+        <div>
+          <div style="font-weight:700;font-size:15px">Assistente IA</div>
+          <div style="font-size:12px;color:#9ca3af">Análise inteligente da sua rotina</div>
+        </div>
+        <div style="margin-left:auto;font-size:11px;color:#9ca3af" id="ai-status">Configure a URL da IA nas configurações abaixo</div>
+      </div>
+      <div style="background:#fffbeb;border:1px solid #fde68a;border-radius:10px;padding:.75rem;margin-bottom:1rem;font-size:12px;color:#92400e">
+        ⚙️ <strong>Configure sua IA:</strong> insira a URL do seu Cloudflare Worker abaixo para ativar o assistente.
+        <div style="margin-top:.5rem;display:flex;gap:.5rem">
+          <input id="worker-url-input" type="text" placeholder="https://seu-worker.workers.dev" style="flex:1;font-size:12px"/>
+          <button class="btn btn-primary btn-sm" onclick="saveWorkerUrl()">Salvar</button>
+        </div>
+      </div>
+      <div class="chat-suggestions" id="chat-suggestions">
+        <span class="chat-sug" onclick="sendSuggestion(this)">Analisar minha rotina</span>
+        <span class="chat-sug" onclick="sendSuggestion(this)">Criar plano de estudo</span>
+        <span class="chat-sug" onclick="sendSuggestion(this)">Dica motivacional</span>
+        <span class="chat-sug" onclick="sendSuggestion(this)">Identificar conflitos de horário</span>
+        <span class="chat-sug" onclick="sendSuggestion(this)">Sugerir horários livres para estudo</span>
+      </div>
+      <div class="chat-box" id="chat-box">
+        <div class="chat-msg ai">Olá! 👋 Sou seu assistente de produtividade. Configure a URL do Cloudflare Worker acima para eu conseguir te ajudar com análise de rotina, planos de estudo e muito mais!</div>
+      </div>
+      <div class="chat-input-row">
+        <input id="chat-input" type="text" placeholder="Pergunte sobre rotina, estudos, produtividade..." onkeydown="if(event.key==='Enter')sendChat()"/>
+        <button class="btn btn-primary" onclick="sendChat()">Enviar</button>
+      </div>
     </div>
   </div>
-</div>
+</main>
 
 <script>
 // ============================================================
 // DATA
 // ============================================================
-const KEYS = { rotina: 'pmal_rotina', notas: 'pmal_notas' };
-const PROVA_DATE = new Date('2026-07-19T08:00:00');
-const DAYS_NAMES = ['Segunda-Feira','Terça-Feira','Quarta-Feira','Quinta-Feira','Sexta-Feira','Sábado','Domingo'];
-
-const DEFAULT_ROUTINE = [
-  // 0 - Segunda
-  [
-    { id: uid(), start:'06:00', end:'06:40', title:'Acordar, se arrumar e café da manhã', notes:'', done:false, type:'meal' },
-    { id: uid(), start:'06:40', end:'07:30', title:'Estudo (Leitura / Foco)', notes:'', done:false, type:'study' },
-    { id: uid(), start:'12:00', end:'18:50', title:'IFAL — Aulas', notes:'', done:false, type:'ifal' },
-    { id: uid(), start:'19:00', end:'20:50', title:'Academia', notes:'', done:false, type:'gym' },
-    { id: uid(), start:'21:30', end:'23:30', title:'Estudo', notes:'', done:false, type:'study' },
-    { id: uid(), start:'23:30', end:'06:00', title:'Dormir', notes:'', done:false, type:'sleep' },
-  ],
-  // 1 - Terça
-  [
-    { id: uid(), start:'04:45', end:'06:00', title:'Corrida na Praça (Foco TAF)', notes:'', done:false, type:'run' },
-    { id: uid(), start:'06:00', end:'07:10', title:'Se arrumar para o colégio', notes:'', done:false, type:'meal' },
-    { id: uid(), start:'07:10', end:'08:00', title:'Estudo', notes:'', done:false, type:'study' },
-    { id: uid(), start:'08:00', end:'12:00', title:'Monitoria Lab Maker (Estudo no tempo livre)', notes:'', done:false, type:'study' },
-    { id: uid(), start:'12:00', end:'18:50', title:'IFAL — Aulas', notes:'', done:false, type:'ifal' },
-    { id: uid(), start:'19:00', end:'20:50', title:'Academia', notes:'', done:false, type:'gym' },
-    { id: uid(), start:'21:30', end:'23:40', title:'Estudo', notes:'', done:false, type:'study' },
-    { id: uid(), start:'23:40', end:'04:45', title:'Dormir', notes:'', done:false, type:'sleep' },
-  ],
-  // 2 - Quarta
-  [
-    { id: uid(), start:'04:45', end:'07:20', title:'Rotina matinal e preparação', notes:'', done:false, type:'meal' },
-    { id: uid(), start:'07:20', end:'09:00', title:'Estudo', notes:'', done:false, type:'study' },
-    { id: uid(), start:'09:00', end:'18:50', title:'IFAL — Aulas / Contra-turno', notes:'', done:false, type:'ifal' },
-    { id: uid(), start:'19:00', end:'20:50', title:'Academia', notes:'', done:false, type:'gym' },
-    { id: uid(), start:'21:30', end:'23:40', title:'Estudo', notes:'', done:false, type:'study' },
-    { id: uid(), start:'23:40', end:'04:45', title:'Dormir', notes:'', done:false, type:'sleep' },
-  ],
-  // 3 - Quinta (= Quarta)
-  [
-    { id: uid(), start:'04:45', end:'07:20', title:'Rotina matinal e preparação', notes:'', done:false, type:'meal' },
-    { id: uid(), start:'07:20', end:'09:00', title:'Estudo', notes:'', done:false, type:'study' },
-    { id: uid(), start:'09:00', end:'18:50', title:'IFAL — Aulas / Contra-turno', notes:'', done:false, type:'ifal' },
-    { id: uid(), start:'19:00', end:'20:50', title:'Academia', notes:'', done:false, type:'gym' },
-    { id: uid(), start:'21:30', end:'23:40', title:'Estudo', notes:'', done:false, type:'study' },
-    { id: uid(), start:'23:40', end:'04:45', title:'Dormir', notes:'', done:false, type:'sleep' },
-  ],
-  // 4 - Sexta
-  [
-    { id: uid(), start:'04:45', end:'06:00', title:'Corrida na Praça (Foco TAF)', notes:'', done:false, type:'run' },
-    { id: uid(), start:'06:00', end:'07:10', title:'Se arrumar para o colégio', notes:'', done:false, type:'meal' },
-    { id: uid(), start:'07:10', end:'08:00', title:'Estudo', notes:'', done:false, type:'study' },
-    { id: uid(), start:'08:00', end:'12:00', title:'Monitoria Lab Maker (Estudo no tempo livre)', notes:'', done:false, type:'study' },
-    { id: uid(), start:'12:00', end:'18:50', title:'IFAL — Aulas', notes:'', done:false, type:'ifal' },
-    { id: uid(), start:'19:00', end:'20:50', title:'Academia', notes:'', done:false, type:'gym' },
-    { id: uid(), start:'22:00', end:'01:00', title:'Estudo Noturno', notes:'', done:false, type:'study' },
-    { id: uid(), start:'01:00', end:'05:30', title:'Dormir', notes:'', done:false, type:'sleep' },
-  ],
-  // 5 - Sábado
-  [
-    { id: uid(), start:'05:30', end:'07:00', title:'Corrida na Praça (TAF)', notes:'', done:false, type:'run' },
-    { id: uid(), start:'09:00', end:'11:50', title:'Estudo (Casa ou Casa da Vó)', notes:'', done:false, type:'study' },
-    { id: uid(), start:'14:20', end:'17:30', title:'Estudo Vespertino', notes:'Ou Horário Livre — definir nas observações', done:false, type:'study' },
-    { id: uid(), start:'19:00', end:'02:00', title:'Estudo Noturno ou Atividade Livre', notes:'Definir nas observações', done:false, type:'free' },
-  ],
-  // 6 - Domingo
-  [
-    { id: uid(), start:'08:00', end:'09:30', title:'Acordar mais tarde e Café da Manhã', notes:'', done:false, type:'meal' },
-    { id: uid(), start:'09:30', end:'12:00', title:'Estudo Matinal', notes:'', done:false, type:'study' },
-    { id: uid(), start:'14:00', end:'18:00', title:'Bloco Vespertino Livre / Estudo Alternativo', notes:'', done:false, type:'free' },
-    { id: uid(), start:'18:00', end:'23:00', title:'Bloco Noturno Livre / Organização', notes:'', done:false, type:'free' },
-    { id: uid(), start:'23:00', end:'06:00', title:'Dormir Mais Cedo', notes:'', done:false, type:'sleep' },
-  ],
+const DAYS = ['Segunda','Terça','Quarta','Quinta','Sexta','Sábado','Domingo'];
+const MOTIVATIONAL = [
+  'Cada hora de estudo hoje é um passo mais perto da aprovação. 🎯',
+  'Disciplina é fazer o que precisa ser feito, mesmo quando não quer. 💪',
+  'Seu futuro está sendo construído agora, bloco a bloco. 🏗️',
+  'O esforço de hoje é o resultado de amanhã. Continue! 🔥',
+  'Foco. Determinação. Consistência. Essa é a fórmula. ⚡',
+  'Você já passou por dias difíceis antes. Esse também vai passar. 🌟',
+  'A aprovação não é sorte — é o resultado de meses de trabalho. 📈',
+  'Cada revisão, cada exercício resolvido te aproxima da vitória. 🏆',
 ];
-
-function uid() { return Math.random().toString(36).slice(2,9) + Date.now().toString(36); }
+const CAT_STYLE = {
+  estudos:  {bg:'#eff6ff',text:'#1d4ed8',border:'#bfdbfe',dot:'#3b82f6'},
+  ifal:     {bg:'#faf5ff',text:'#7c3aed',border:'#ddd6fe',dot:'#8b5cf6'},
+  academia: {bg:'#f0fdf4',text:'#15803d',border:'#bbf7d0',dot:'#22c55e'},
+  taf:      {bg:'#fff7ed',text:'#c2410c',border:'#fed7aa',dot:'#f97316'},
+  rotina:   {bg:'#f9fafb',text:'#374151',border:'#e5e7eb',dot:'#9ca3af'},
+};
+const PRI_STYLE = {
+  urgente: {bg:'#fef2f2',text:'#b91c1c',border:'#fecaca'},
+  moderado:{bg:'#fffbeb',text:'#92400e',border:'#fde68a'},
+  leve:    {bg:'#f0fdf4',text:'#15803d',border:'#bbf7d0'},
+};
+const DEFAULT_ROUTINE = {
+  Segunda:[
+    {id:'s1',time:'06:00',title:'Acordar',cat:'rotina',pri:'leve',done:false,notes:'',emoji:'🌅'},
+    {id:'s2',time:'06:00–06:40',title:'Organização pessoal / manhã',cat:'rotina',pri:'leve',done:false,notes:'',emoji:'🚿'},
+    {id:'s3',time:'06:40–07:30',title:'Estudos',cat:'estudos',pri:'urgente',done:false,notes:'',emoji:'📚'},
+    {id:'s4',time:'12:00–18:50',title:'IFAL',cat:'ifal',pri:'urgente',done:false,notes:'',emoji:'🎓'},
+    {id:'s5',time:'19:00–20:50',title:'Academia',cat:'academia',pri:'moderado',done:false,notes:'',emoji:'💪'},
+    {id:'s6',time:'21:30–23:30',title:'Estudos',cat:'estudos',pri:'urgente',done:false,notes:'',emoji:'📖'},
+    {id:'s7',time:'23:30',title:'Dormir',cat:'rotina',pri:'leve',done:false,notes:'',emoji:'🌙'},
+  ],
+  Terça:[
+    {id:'t1',time:'04:45',title:'Acordar',cat:'rotina',pri:'leve',done:false,notes:'',emoji:'🌅'},
+    {id:'t2',time:'05:00–06:30',title:'Corrida — TAF',cat:'taf',pri:'urgente',done:false,notes:'Corrida na praça',emoji:'🏃'},
+    {id:'t3',time:'06:30–07:10',title:'Organização pessoal',cat:'rotina',pri:'leve',done:false,notes:'',emoji:'🚿'},
+    {id:'t4',time:'07:10–08:00',title:'Estudos',cat:'estudos',pri:'urgente',done:false,notes:'',emoji:'📚'},
+    {id:'t5',time:'08:00–12:00',title:'Monitoria Lab Maker',cat:'ifal',pri:'urgente',done:false,notes:'Estudar durante horários livres',emoji:'🔬'},
+    {id:'t6',time:'12:00–18:50',title:'IFAL',cat:'ifal',pri:'urgente',done:false,notes:'',emoji:'🎓'},
+    {id:'t7',time:'19:00–20:50',title:'Academia',cat:'academia',pri:'moderado',done:false,notes:'',emoji:'💪'},
+    {id:'t8',time:'21:30–23:40',title:'Estudos',cat:'estudos',pri:'urgente',done:false,notes:'',emoji:'📖'},
+  ],
+  Quarta:[
+    {id:'q1',time:'04:45',title:'Acordar',cat:'rotina',pri:'leve',done:false,notes:'',emoji:'🌅'},
+    {id:'q2',time:'07:20–09:00',title:'Estudos',cat:'estudos',pri:'urgente',done:false,notes:'',emoji:'📚'},
+    {id:'q3',time:'10:00–18:50',title:'IFAL',cat:'ifal',pri:'urgente',done:false,notes:'',emoji:'🎓'},
+    {id:'q4',time:'19:00–20:50',title:'Academia',cat:'academia',pri:'moderado',done:false,notes:'',emoji:'💪'},
+    {id:'q5',time:'21:30–23:40',title:'Estudos',cat:'estudos',pri:'urgente',done:false,notes:'',emoji:'📖'},
+  ],
+  Quinta:[
+    {id:'qu1',time:'04:45',title:'Acordar',cat:'rotina',pri:'leve',done:false,notes:'',emoji:'🌅'},
+    {id:'qu2',time:'07:20–09:00',title:'Estudos',cat:'estudos',pri:'urgente',done:false,notes:'',emoji:'📚'},
+    {id:'qu3',time:'10:00–18:50',title:'IFAL',cat:'ifal',pri:'urgente',done:false,notes:'',emoji:'🎓'},
+    {id:'qu4',time:'19:00–20:50',title:'Academia',cat:'academia',pri:'moderado',done:false,notes:'',emoji:'💪'},
+    {id:'qu5',time:'21:30–23:40',title:'Estudos',cat:'estudos',pri:'urgente',done:false,notes:'',emoji:'📖'},
+  ],
+  Sexta:[
+    {id:'sx1',time:'04:45',title:'Acordar',cat:'rotina',pri:'leve',done:false,notes:'',emoji:'🌅'},
+    {id:'sx2',time:'05:00–06:30',title:'Corrida — TAF',cat:'taf',pri:'urgente',done:false,notes:'',emoji:'🏃'},
+    {id:'sx3',time:'07:10–08:00',title:'Estudos',cat:'estudos',pri:'urgente',done:false,notes:'',emoji:'📚'},
+    {id:'sx4',time:'08:00–12:00',title:'Monitoria Lab Maker',cat:'ifal',pri:'urgente',done:false,notes:'',emoji:'🔬'},
+    {id:'sx5',time:'12:00–18:50',title:'IFAL',cat:'ifal',pri:'urgente',done:false,notes:'',emoji:'🎓'},
+    {id:'sx6',time:'19:00–20:50',title:'Academia',cat:'academia',pri:'moderado',done:false,notes:'',emoji:'💪'},
+    {id:'sx7',time:'22:00–01:00',title:'Estudos noturnos',cat:'estudos',pri:'urgente',done:false,notes:'',emoji:'🌃'},
+  ],
+  Sábado:[
+    {id:'sb1',time:'05:30',title:'Acordar',cat:'rotina',pri:'leve',done:false,notes:'',emoji:'🌅'},
+    {id:'sb2',time:'06:00–07:30',title:'Corrida — TAF',cat:'taf',pri:'urgente',done:false,notes:'',emoji:'🏃'},
+    {id:'sb3',time:'09:00–11:50',title:'Estudos',cat:'estudos',pri:'urgente',done:false,notes:'Se for para casa da avó',emoji:'📚'},
+    {id:'sb4',time:'14:20–17:30',title:'Estudos',cat:'estudos',pri:'moderado',done:false,notes:'Ou horário livre à tarde',emoji:'📖'},
+    {id:'sb5',time:'20:00–02:00',title:'Estudos / Livre',cat:'estudos',pri:'leve',done:false,notes:'Possibilidade de estudar até 02:00',emoji:'🌃'},
+  ],
+  Domingo:[
+    {id:'dm1',time:'08:00',title:'Acordar',cat:'rotina',pri:'leve',done:false,notes:'',emoji:'🌅'},
+    {id:'dm2',time:'09:30–12:00',title:'Estudos',cat:'estudos',pri:'urgente',done:false,notes:'',emoji:'📚'},
+    {id:'dm3',time:'14:00–17:30',title:'Tarde livre / Estudos',cat:'estudos',pri:'moderado',done:false,notes:'Semelhante ao sábado',emoji:'📖'},
+    {id:'dm4',time:'23:00',title:'Dormir',cat:'rotina',pri:'leve',done:false,notes:'',emoji:'🌙'},
+  ],
+};
+const DEFAULT_HABITS = [
+  {id:'h1',name:'Estudar pelo menos 2h',emoji:'📚',days:[]},
+  {id:'h2',name:'Beber 2L de água',emoji:'💧',days:[]},
+  {id:'h3',name:'Academia / Corrida',emoji:'🏃',days:[]},
+  {id:'h4',name:'Dormir antes da 01:00',emoji:'🌙',days:[]},
+  {id:'h5',name:'Revisão de matérias',emoji:'🔄',days:[]},
+];
 
 // ============================================================
 // STATE
 // ============================================================
-let routine = [];
-let notes = [];
-let currentDay = 0;
-let currentSection = 'rotina';
-let editingTask = null;
-let isAddingTask = false;
+function ls(k,d){try{const v=localStorage.getItem(k);return v?JSON.parse(v):d}catch{return d}}
+function ss(k,v){try{localStorage.setItem(k,JSON.stringify(v))}catch{}}
+
+let routine    = ls('rp_routine', DEFAULT_ROUTINE);
+let habits     = ls('rp_habits',  DEFAULT_HABITS);
+let notes      = ls('rp_notes',   []);
+let studySess  = ls('rp_study',   []);
+let tafRuns    = ls('rp_taf',     []);
+let goals      = ls('rp_goals',   [{id:'g1',title:'Aprovação no concurso',type:'objetivo',prog:35,notes:'Estudar todas as matérias do edital'},{id:'g2',title:'Meta TAF: 2.4km em 12min',type:'taf',prog:60,notes:'Melhorar pace a cada semana'}]);
+let xp         = ls('rp_xp',      0);
+let streak     = ls('rp_streak',  0);
+let energy     = ls('rp_energy',  null);
+let workerUrl  = ls('rp_worker',  '');
+let chatHistory= [];
+let currentTab = 'dashboard';
+let activeDayIdx = (new Date().getDay()+6)%7;
+let motivIdx   = 0;
+
+function save(){
+  ss('rp_routine',routine);ss('rp_habits',habits);ss('rp_notes',notes);
+  ss('rp_study',studySess);ss('rp_taf',tafRuns);ss('rp_goals',goals);
+  ss('rp_xp',xp);ss('rp_streak',streak);ss('rp_energy',energy);ss('rp_worker',workerUrl);
+}
 
 // ============================================================
 // INIT
 // ============================================================
-function init() {
-  // Load or seed routine
-  const saved = localStorage.getItem(KEYS.rotina);
-  if (saved) {
-    routine = JSON.parse(saved);
-  } else {
-    routine = JSON.parse(JSON.stringify(DEFAULT_ROUTINE));
-    saveRoutine();
-  }
-  // Load notes
-  const savedNotes = localStorage.getItem(KEYS.notas);
-  notes = savedNotes ? JSON.parse(savedNotes) : [];
-
-  // Detect today (JS: 0=Sun,1=Mon...6=Sat → our: 0=Mon...6=Sun)
-  const jsDay = new Date().getDay();
-  currentDay = jsDay === 0 ? 6 : jsDay - 1;
-
-  renderDaySelector();
-  renderTasks();
-  renderNotes();
-  startCountdown();
-  showSection('rotina');
-}
-
-function saveRoutine() { localStorage.setItem(KEYS.rotina, JSON.stringify(routine)); }
-function saveNotes()   { localStorage.setItem(KEYS.notas,   JSON.stringify(notes)); }
-
-// ============================================================
-// NAV
-// ============================================================
-function showSection(name) {
-  currentSection = name;
-  ['rotina','edital','notas'].forEach(s => {
-    document.getElementById(`section-${s}`).classList.toggle('hidden', s !== name);
-    document.getElementById(`nav-${s}`).classList.toggle('active', s === name);
-  });
-}
-
-// ============================================================
-// DAY SELECTOR
-// ============================================================
-function selectDay(d) {
-  currentDay = d;
-  renderDaySelector();
-  renderTasks();
-}
-
-function renderDaySelector() {
-  for (let i = 0; i < 7; i++) {
-    const btn = document.getElementById(`day-${i}`);
-    btn.classList.toggle('active', i === currentDay);
-  }
-}
-
-// ============================================================
-// TASK LIST
-// ============================================================
-const TYPE_ICONS = {
-  sleep:'😴', study:'📚', ifal:'🏫', gym:'🏋️', run:'🏃', meal:'☕', free:'🌿'
+window.onload = () => {
+  updateMotiv();
+  setInterval(updateMotiv, 12000);
+  updateXpUI();
+  updateEnergyUI();
+  renderPomo();
+  renderDashboard();
+  renderRotina();
+  renderEstudos();
+  renderNotas();
+  renderTaf();
+  renderMetas();
+  document.getElementById('worker-url-input').value = workerUrl;
 };
 
-function renderTasks() {
-  const tasks = routine[currentDay];
-  const list = document.getElementById('task-list');
-  list.innerHTML = '';
+function updateMotiv(){
+  document.getElementById('motiv-bar').textContent = MOTIVATIONAL[motivIdx];
+  motivIdx = (motivIdx+1) % MOTIVATIONAL.length;
+}
+function updateXpUI(){
+  const lv = Math.floor(xp/500)+1;
+  const lxp = xp%500;
+  document.getElementById('level-label').textContent = 'Nv.'+lv;
+  document.getElementById('xp-label').textContent = lxp+'xp';
+  document.getElementById('xp-fill').style.width = Math.round(lxp/500*100)+'%';
+  document.getElementById('streak-val').textContent = streak;
+}
+function updateEnergyUI(){
+  const box = document.getElementById('energy-box');
+  if(energy){ box.classList.add('hidden'); return; }
+  box.classList.remove('hidden');
+}
+function setEnergy(val){
+  energy=val; save(); updateEnergyUI();
+}
+function goTab(tab){
+  document.querySelectorAll('.nav-btn').forEach(b=>b.classList.remove('active'));
+  document.querySelectorAll('[id^="tab-"]').forEach(el=>el.classList.add('hidden'));
+  document.getElementById('tab-'+tab).classList.remove('hidden');
+  document.querySelectorAll('.nav-btn').forEach(b=>{if(b.getAttribute('onclick')?.includes("'"+tab+"'"))b.classList.add('active');});
+  currentTab=tab;
+  if(tab==='rotina') renderRotina();
+  if(tab==='estudos') renderEstudos();
+  if(tab==='notas') renderNotas();
+  if(tab==='taf') renderTaf();
+  if(tab==='metas') renderMetas();
+}
 
-  tasks.forEach(task => {
-    const card = document.createElement('div');
-    card.className = `task-card bg-white rounded-2xl p-4 shadow-sm border border-slate-100 flex items-start gap-3 ${task.type} ${task.done ? 'done' : ''}`;
-    card.innerHTML = `
-      <input type="checkbox" class="task-check mt-0.5" ${task.done ? 'checked' : ''} onchange="toggleTask('${task.id}', this.checked)">
-      <div class="flex-1 min-w-0">
-        <div class="flex items-center gap-1.5 mb-0.5">
-          <span class="text-xs font-mono text-slate-400">${task.start} — ${task.end}</span>
-          <span class="text-xs">${TYPE_ICONS[task.type] || '📌'}</span>
-        </div>
-        <div class="task-title text-sm font-semibold text-slate-700 leading-snug">${escHtml(task.title)}</div>
-        ${task.notes ? `<div class="text-xs text-slate-400 mt-1 leading-snug">${escHtml(task.notes)}</div>` : ''}
+// ============================================================
+// DASHBOARD
+// ============================================================
+function renderDashboard(){
+  const todayName = DAYS[(new Date().getDay()+6)%7];
+  const todayTasks = routine[todayName]||[];
+  const done = todayTasks.filter(t=>t.done).length;
+  const pct = todayTasks.length ? Math.round(done/todayTasks.length*100) : 0;
+  const totalDone = Object.values(routine).flat().filter(t=>t.done).length;
+  const totalTasks = Object.values(routine).flat().length;
+  const weekPct = totalTasks ? Math.round(totalDone/totalTasks*100) : 0;
+  const totalStudy = studySess.reduce((s,x)=>s+x.hours,0);
+
+  // Stats
+  const stats = [
+    {label:'Hoje',value:`${done}/${todayTasks.length}`,sub:`${pct}% concluído`,icon:'📅',grad:'linear-gradient(135deg,#3b82f6,#4f46e5)'},
+    {label:'Semana',value:`${weekPct}%`,sub:`${totalDone} tarefas`,icon:'📊',grad:'linear-gradient(135deg,#8b5cf6,#ec4899)'},
+    {label:'Horas estudo',value:`${totalStudy}h`,sub:'Total registrado',icon:'📚',grad:'linear-gradient(135deg,#10b981,#0891b2)'},
+    {label:'Sequência',value:`${streak} dias`,sub:'Estudando',icon:'🔥',grad:'linear-gradient(135deg,#f59e0b,#ef4444)'},
+  ];
+  document.getElementById('stat-cards').innerHTML = stats.map(s=>`
+    <div class="stat-card" style="background:${s.grad}">
+      <div class="stat-icon">${s.icon}</div>
+      <div class="stat-value">${s.value}</div>
+      <div class="stat-label">${s.label}</div>
+      <div class="stat-sub">${s.sub}</div>
+    </div>`).join('');
+
+  // Today tasks
+  document.getElementById('today-title').textContent = `Hoje — ${todayName}`;
+  document.getElementById('today-sub').textContent = `${done}/${todayTasks.length} tarefas`;
+  document.getElementById('today-prog').style.width = pct+'%';
+  document.getElementById('today-tasks-list').innerHTML = todayTasks.map(t=>{
+    const cs = CAT_STYLE[t.cat]||CAT_STYLE.rotina;
+    return `<div class="task-card ${t.done?'done':''}" style="background:${cs.bg};border-color:${cs.border}" onclick="quickToggle('${todayName}','${t.id}')">
+      <div class="task-header">
+        <div class="task-check ${t.done?'checked':''}">${t.done?'<svg width="10" height="10" viewBox="0 0 10 10"><path d="M1.5 5l2.5 2.5 4.5-4.5" stroke="white" stroke-width="1.8" fill="none" stroke-linecap="round"/></svg>':''}</div>
+        <span style="font-size:14px">${t.emoji}</span>
+        <span class="task-title-text ${t.done?'':''}\" style="color:${t.done?'#9ca3af':cs.text};${t.done?'text-decoration:line-through':''}">${t.title}</span>
+        <span class="task-time">${t.time}</span>
       </div>
-      <button onclick="openEditModal('${task.id}')" class="text-slate-300 hover:text-blue-400 transition-colors text-lg leading-none mt-0.5 flex-shrink-0">✏️</button>
-    `;
-    list.appendChild(card);
-  });
+    </div>`;
+  }).join('');
 
-  updateProgress();
-  checkResetButton();
+  // Habits
+  renderHabitsDash();
 }
 
-function updateProgress() {
-  const tasks = routine[currentDay];
-  const done = tasks.filter(t => t.done).length;
-  const total = tasks.length;
-  const pct = total ? Math.round((done / total) * 100) : 0;
-  document.getElementById('progress-fill').style.width = pct + '%';
-  document.getElementById('progress-label').textContent = `${done} / ${total}`;
-}
-
-function checkResetButton() {
-  const allDone = routine.every(day => day.every(t => t.done));
-  const resetBtn = document.getElementById('reset-week-btn');
-  resetBtn.classList.toggle('hidden', !allDone);
-}
-
-function toggleTask(id, checked) {
-  const task = findTask(id);
-  if (task) { task.done = checked; saveRoutine(); renderTasks(); }
-}
-
-function findTask(id) {
-  for (const day of routine) {
-    const t = day.find(t => t.id === id);
-    if (t) return t;
-  }
-  return null;
+function quickToggle(day, id){
+  const t = (routine[day]||[]).find(x=>x.id===id);
+  if(!t) return;
+  if(!t.done){ xp+=10; ss('rp_xp',xp); updateXpUI(); }
+  t.done = !t.done;
+  save(); renderDashboard();
 }
 
 // ============================================================
-// MODAL — EDIT / ADD
+// POMODORO
 // ============================================================
-function openEditModal(id) {
-  const task = findTask(id);
-  if (!task) return;
-  isAddingTask = false;
-  editingTask = task;
-  document.getElementById('modal-title').textContent = 'Editar Tarefa';
-  document.getElementById('modal-task-id').value = id;
-  document.getElementById('modal-start').value = task.start;
-  document.getElementById('modal-end').value = task.end;
-  document.getElementById('modal-title-input').value = task.title;
-  document.getElementById('modal-notes').value = task.notes;
-  document.getElementById('modal-delete-btn').classList.remove('hidden');
-  document.getElementById('modal').classList.remove('hidden');
-}
-
-function openAddModal() {
-  isAddingTask = true;
-  editingTask = null;
-  document.getElementById('modal-title').textContent = 'Nova Tarefa';
-  document.getElementById('modal-task-id').value = '';
-  document.getElementById('modal-start').value = '';
-  document.getElementById('modal-end').value = '';
-  document.getElementById('modal-title-input').value = '';
-  document.getElementById('modal-notes').value = '';
-  document.getElementById('modal-delete-btn').classList.add('hidden');
-  document.getElementById('modal').classList.remove('hidden');
-  document.getElementById('modal-title-input').focus();
-}
-
-function closeModal() { document.getElementById('modal').classList.add('hidden'); }
-
-function saveModal() {
-  const start = document.getElementById('modal-start').value;
-  const end   = document.getElementById('modal-end').value;
-  const title = document.getElementById('modal-title-input').value.trim();
-  const notes = document.getElementById('modal-notes').value.trim();
-  if (!title) { document.getElementById('modal-title-input').focus(); return; }
-
-  if (isAddingTask) {
-    const newTask = { id: uid(), start, end, title, notes, done: false, type: detectType(title) };
-    routine[currentDay].push(newTask);
-    routine[currentDay].sort((a, b) => a.start.localeCompare(b.start));
-  } else {
-    const task = findTask(document.getElementById('modal-task-id').value);
-    if (task) { task.start = start; task.end = end; task.title = title; task.notes = notes; }
-  }
-
-  saveRoutine();
-  closeModal();
-  renderTasks();
-}
-
-function deleteTaskFromModal() {
-  const id = document.getElementById('modal-task-id').value;
-  for (let i = 0; i < 7; i++) {
-    const idx = routine[i].findIndex(t => t.id === id);
-    if (idx !== -1) { routine[i].splice(idx, 1); break; }
-  }
-  saveRoutine();
-  closeModal();
-  renderTasks();
-}
-
-function detectType(title) {
-  const t = title.toLowerCase();
-  if (t.includes('dormir')) return 'sleep';
-  if (t.includes('corrid') || t.includes('taf')) return 'run';
-  if (t.includes('ifal') || t.includes('aula')) return 'ifal';
-  if (t.includes('academia') || t.includes('muscula')) return 'gym';
-  if (t.includes('estudo') || t.includes('leitura') || t.includes('monitoria')) return 'study';
-  if (t.includes('café') || t.includes('acordar') || t.includes('arrumar') || t.includes('refeição')) return 'meal';
-  return 'free';
-}
-
-// ============================================================
-// RESET
-// ============================================================
-function openResetModal() { document.getElementById('reset-modal').classList.remove('hidden'); }
-function closeResetModal() { document.getElementById('reset-modal').classList.add('hidden'); }
-function confirmReset() {
-  routine.forEach(day => day.forEach(t => t.done = false));
-  saveRoutine();
-  closeResetModal();
-  renderTasks();
-}
-
-// ============================================================
-// NOTES
-// ============================================================
-const PRIORITY_CONFIG = {
-  leve:      { label: '🟢 Leve',      bg: 'bg-green-50',  border: 'border-green-200',  badge: 'bg-green-100 text-green-700' },
-  moderado:  { label: '🟡 Moderado',  bg: 'bg-amber-50',  border: 'border-amber-200',  badge: 'bg-amber-100 text-amber-700' },
-  importante:{ label: '🔴 Importante',bg: 'bg-red-50',    border: 'border-red-200',    badge: 'bg-red-100 text-red-700' },
-};
-
-function addNote() {
-  const text = document.getElementById('note-text').value.trim();
-  if (!text) { document.getElementById('note-text').focus(); return; }
-  const priority = document.getElementById('note-priority').value;
-  notes.unshift({ id: uid(), text, priority, createdAt: new Date().toLocaleDateString('pt-BR') });
-  document.getElementById('note-text').value = '';
-  saveNotes();
-  renderNotes();
-}
-
-function deleteNote(id) {
-  notes = notes.filter(n => n.id !== id);
-  saveNotes();
-  renderNotes();
-}
-
-function clearAllNotes() {
-  if (!confirm('Apagar todas as anotações?')) return;
-  notes = [];
-  saveNotes();
-  renderNotes();
-}
-
-function renderNotes() {
-  const list = document.getElementById('notes-list');
-  const empty = document.getElementById('notes-empty');
-  const actions = document.getElementById('notes-actions');
-  list.innerHTML = '';
-
-  if (notes.length === 0) { empty.classList.remove('hidden'); actions.classList.add('hidden'); return; }
-  empty.classList.add('hidden'); actions.classList.remove('hidden');
-
-  notes.forEach(note => {
-    const cfg = PRIORITY_CONFIG[note.priority];
-    const card = document.createElement('div');
-    card.className = `note-card ${cfg.bg} border ${cfg.border} rounded-2xl p-4 shadow-sm`;
-    card.innerHTML = `
-      <div class="flex items-start justify-between gap-2 mb-2">
-        <span class="text-[11px] font-semibold px-2 py-0.5 rounded-full ${cfg.badge}">${cfg.label}</span>
-        <div class="flex items-center gap-2">
-          <span class="text-[11px] text-slate-400 font-mono">${note.createdAt}</span>
-          <button onclick="deleteNote('${note.id}')" class="text-slate-300 hover:text-red-400 transition-colors text-sm">✕</button>
+let pomoMin=25, pomoSec=0, pomoRunning=false, pomoMode='focus', pomoCycles=0, pomoInterval=null;
+function renderPomo(){
+  const total = pomoMode==='focus'?25*60:5*60;
+  const elapsed = total-(pomoMin*60+pomoSec);
+  const pct = elapsed/total;
+  const r=54, circ=2*Math.PI*r;
+  const color = pomoMode==='focus'?'#4f46e5':'#10b981';
+  document.getElementById('pomo-card').innerHTML = `
+  <div class="card" style="height:100%">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:.75rem">
+      <div class="card-title" style="margin:0">Pomodoro</div>
+      <div style="display:flex;gap:5px">
+        <button onclick="setPomoMode('focus')" class="btn btn-sm ${pomoMode==='focus'?'btn-primary':'btn-ghost'}">Foco</button>
+        <button onclick="setPomoMode('break')" class="btn btn-sm ${pomoMode==='break'?'btn-primary':'btn-ghost'}">Pausa</button>
+      </div>
+    </div>
+    <div style="display:flex;flex-direction:column;align-items:center;gap:.75rem">
+      <div class="pomo-circle">
+        <svg width="128" height="128" viewBox="0 0 128 128">
+          <circle cx="64" cy="64" r="${r}" fill="none" stroke="#f1f5f9" stroke-width="8"/>
+          <circle cx="64" cy="64" r="${r}" fill="none" stroke="${color}" stroke-width="8"
+            stroke-dasharray="${circ}" stroke-dashoffset="${circ*(1-pct)}"
+            stroke-linecap="round" transform="rotate(-90 64 64)" style="transition:stroke-dashoffset 1s linear"/>
+        </svg>
+        <div class="pomo-time">
+          <span>${String(pomoMin).padStart(2,'0')}:${String(pomoSec).padStart(2,'0')}</span>
+          <small>${pomoMode==='focus'?'Focando':'Pausa'}</small>
         </div>
       </div>
-      <p class="text-sm text-slate-700 leading-relaxed whitespace-pre-wrap">${escHtml(note.text)}</p>
-    `;
-    list.appendChild(card);
-  });
+      <div style="display:flex;gap:.5rem">
+        <button onclick="togglePomo()" class="btn ${pomoRunning?'btn-ghost':'btn-primary'}">${pomoRunning?'⏸ Pausar':'▶ Iniciar'}</button>
+        <button onclick="resetPomo()" class="btn btn-ghost">↺</button>
+      </div>
+      <div style="font-size:12px;color:#9ca3af">Ciclos: <strong style="color:#374151">${pomoCycles}</strong></div>
+    </div>
+  </div>`;
+}
+function setPomoMode(m){ pomoMode=m; pomoRunning=false; clearInterval(pomoInterval); pomoMin=m==='focus'?25:5; pomoSec=0; renderPomo(); }
+function togglePomo(){
+  if(pomoRunning){ clearInterval(pomoInterval); pomoRunning=false; renderPomo(); return; }
+  pomoRunning=true;
+  pomoInterval=setInterval(()=>{
+    if(pomoSec===0){
+      if(pomoMin===0){ clearInterval(pomoInterval); pomoRunning=false; pomoCycles++; setPomoMode(pomoMode==='focus'?'break':'focus'); return; }
+      pomoMin--; pomoSec=59;
+    } else { pomoSec--; }
+    renderPomo();
+  },1000);
+  renderPomo();
+}
+function resetPomo(){ clearInterval(pomoInterval); pomoRunning=false; pomoMin=pomoMode==='focus'?25:5; pomoSec=0; renderPomo(); }
+
+// ============================================================
+// HABITS
+// ============================================================
+function todayKey(){ return new Date().toISOString().split('T')[0]; }
+function last7(){
+  return Array.from({length:7},(_,i)=>{const d=new Date();d.setDate(d.getDate()-6+i);return d.toISOString().split('T')[0];});
+}
+function renderHabitsDash(){
+  const days = last7();
+  const dayLabels = ['D','S','T','Q','Q','S','S'];
+  const todayDow = new Date().getDay();
+  document.getElementById('habit-card-dash').innerHTML = `
+  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:.75rem">
+    <div class="card-title" style="margin:0">Controle de hábitos</div>
+    <span style="font-size:12px;color:#9ca3af">${new Date().toLocaleDateString('pt-BR',{weekday:'long'})}</span>
+  </div>
+  ${habits.map(h=>{
+    const doneToday = h.days.includes(todayKey());
+    return `<div class="habit-row">
+      <div class="habit-emoji" style="background:${doneToday?'#dcfce7':'#f3f4f6'}" onclick="toggleHabit('${h.id}')" title="Marcar como feito hoje">${h.emoji}</div>
+      <span class="habit-name ${doneToday?'done':''}">${h.name}</span>
+      <div class="habit-dots">
+        ${days.map(d=>`<div class="habit-dot" style="background:${h.days.includes(d)?'#22c55e':'#e5e7eb'}" title="${d}"></div>`).join('')}
+      </div>
+    </div>`;
+  }).join('')}`;
+}
+function toggleHabit(id){
+  const h = habits.find(x=>x.id===id);
+  if(!h) return;
+  const tk = todayKey();
+  if(h.days.includes(tk)) h.days=h.days.filter(d=>d!==tk);
+  else { h.days.push(tk); xp+=5; ss('rp_xp',xp); updateXpUI(); }
+  save(); renderHabitsDash();
 }
 
 // ============================================================
-// COUNTDOWN
+// ROTINA
 // ============================================================
-function startCountdown() {
-  function tick() {
-    const now = new Date();
-    const diff = PROVA_DATE - now;
-    if (diff <= 0) {
-      ['cd-dias','cd-horas','cd-min','cd-seg'].forEach(id => document.getElementById(id).textContent = '00');
-      return;
-    }
-    const d = Math.floor(diff / 86400000);
-    const h = Math.floor((diff % 86400000) / 3600000);
-    const m = Math.floor((diff % 3600000) / 60000);
-    const s = Math.floor((diff % 60000) / 1000);
-    document.getElementById('cd-dias').textContent = String(d).padStart(2,'0');
-    document.getElementById('cd-horas').textContent = String(h).padStart(2,'0');
-    document.getElementById('cd-min').textContent = String(m).padStart(2,'0');
-    document.getElementById('cd-seg').textContent = String(s).padStart(2,'0');
+function renderRotina(){
+  // Day tabs
+  document.getElementById('day-tabs').innerHTML = DAYS.map((d,i)=>{
+    const tasks = routine[d]||[];
+    const pct = tasks.length ? Math.round(tasks.filter(t=>t.done).length/tasks.length*100) : 0;
+    const isToday = i === (new Date().getDay()+6)%7;
+    return `<button class="day-tab ${i===activeDayIdx?'active':''} ${isToday?'today':''}" onclick="setDay(${i})">
+      ${d.slice(0,3)}${isToday?'<small style="display:block;font-size:10px;opacity:.7">hoje</small>':''}
+      ${pct>0?`<span class="day-pct">${pct}%</span>`:''}
+    </button>`;
+  }).join('');
+
+  const day = DAYS[activeDayIdx];
+  const tasks = routine[day]||[];
+  const done = tasks.filter(t=>t.done).length;
+  const pct = tasks.length ? Math.round(done/tasks.length*100) : 0;
+
+  document.getElementById('rotina-content').innerHTML = `
+  <div class="card">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem">
+      <div>
+        <div style="font-weight:700;font-size:16px">${day}</div>
+        <div style="font-size:12px;color:#9ca3af">${done}/${tasks.length} tarefas — ${pct}% concluído</div>
+      </div>
+      <div style="display:flex;align-items:center;gap:.75rem">
+        <div class="progress-bar" style="width:80px"><div class="progress-fill" style="background:#4f46e5;width:${pct}%"></div></div>
+        <button class="btn btn-primary btn-sm" onclick="showAddTask()">+ Adicionar</button>
+      </div>
+    </div>
+    <div id="add-task-form" class="hidden" style="background:#eef2ff;border-radius:12px;padding:1rem;margin-bottom:1rem">
+      <div class="form-row" style="margin-bottom:.5rem">
+        <div style="flex:0 0 50px"><label>Emoji</label><input id="nt-emoji" value="📌" style="text-align:center"/></div>
+        <div style="flex:1"><label>Título</label><input id="nt-title" placeholder="Ex: Estudos"/></div>
+        <div style="flex:0 0 130px"><label>Horário</label><input id="nt-time" placeholder="09:00–10:00" style="font-family:monospace"/></div>
+      </div>
+      <div style="display:flex;gap:.5rem;flex-wrap:wrap;margin-bottom:.5rem">
+        ${Object.keys(CAT_STYLE).map(c=>`<button class="btn btn-sm" id="ncat-${c}" onclick="selectCat('${c}')" style="background:${CAT_STYLE[c].bg};color:${CAT_STYLE[c].text};border-color:${CAT_STYLE[c].border}">${c}</button>`).join('')}
+      </div>
+      <div style="display:flex;gap:.5rem;margin-bottom:.5rem">
+        ${Object.keys(PRI_STYLE).map(p=>`<button class="btn btn-sm" id="npri-${p}" onclick="selectPri('${p}')" style="background:${PRI_STYLE[p].bg};color:${PRI_STYLE[p].text};border-color:${PRI_STYLE[p].border}">${p}</button>`).join('')}
+      </div>
+      <div style="display:flex;gap:.5rem">
+        <button class="btn btn-primary btn-sm" onclick="addTask()">Adicionar</button>
+        <button class="btn btn-ghost btn-sm" onclick="document.getElementById('add-task-form').classList.add('hidden')">Cancelar</button>
+      </div>
+    </div>
+    <div id="tasks-list" style="max-height:520px;overflow-y:auto">
+      ${tasks.length===0?'<div style="text-align:center;padding:2rem;color:#9ca3af;font-size:14px">Nenhuma tarefa para '+day+'</div>':tasks.map(t=>renderTask(t,day)).join('')}
+    </div>
+  </div>`;
+}
+let newTaskCat='estudos', newTaskPri='moderado';
+function selectCat(c){ newTaskCat=c; document.querySelectorAll('[id^="ncat-"]').forEach(b=>b.style.opacity='0.5'); document.getElementById('ncat-'+c).style.opacity='1'; }
+function selectPri(p){ newTaskPri=p; document.querySelectorAll('[id^="npri-"]').forEach(b=>b.style.opacity='0.5'); document.getElementById('npri-'+p).style.opacity='1'; }
+function showAddTask(){ document.getElementById('add-task-form').classList.remove('hidden'); }
+function addTask(){
+  const title = document.getElementById('nt-title').value.trim();
+  if(!title) return;
+  const t = {id:Date.now().toString(),time:document.getElementById('nt-time').value,title,cat:newTaskCat,pri:newTaskPri,done:false,notes:'',emoji:document.getElementById('nt-emoji').value||'📌'};
+  const day = DAYS[activeDayIdx];
+  if(!routine[day]) routine[day]=[];
+  routine[day].push(t);
+  save(); renderRotina();
+}
+function setDay(i){ activeDayIdx=i; renderRotina(); }
+
+function renderTask(t, day){
+  const cs = CAT_STYLE[t.cat]||CAT_STYLE.rotina;
+  const ps = PRI_STYLE[t.pri]||PRI_STYLE.leve;
+  return `<div class="task-card ${t.done?'done':''}" style="background:${cs.bg};border-color:${cs.border}" id="tc-${t.id}">
+    <div class="task-header" onclick="toggleTaskExpand('${t.id}','${day}')">
+      <div class="task-check ${t.done?'checked':''}" onclick="event.stopPropagation();toggleTask('${day}','${t.id}')">
+        ${t.done?'<svg width="10" height="10" viewBox="0 0 10 10"><path d="M1.5 5l2.5 2.5 4.5-4.5" stroke="white" stroke-width="1.8" fill="none" stroke-linecap="round"/></svg>':''}
+      </div>
+      <span style="font-size:15px">${t.emoji}</span>
+      <span class="task-title-text" style="color:${t.done?'#9ca3af':cs.text};${t.done?'text-decoration:line-through':''}">${t.title}</span>
+      <span class="task-time">${t.time}</span>
+      <span class="priority-badge" style="background:${ps.bg};color:${ps.text};border-color:${ps.border}">${t.pri}</span>
+      <span style="color:#d1d5db;font-size:11px">▼</span>
+    </div>
+    <div class="task-body hidden" id="tb-${t.id}">
+      ${t.notes?`<div class="task-notes">${t.notes}</div>`:''}
+      <div id="edit-form-${t.id}" class="hidden" style="margin-bottom:.5rem">
+        <div class="form-row" style="margin-bottom:.5rem">
+          <div><label>Título</label><input id="et-title-${t.id}" value="${t.title.replace(/"/g,'&quot;')}"/></div>
+          <div><label>Horário</label><input id="et-time-${t.id}" value="${t.time}" style="font-family:monospace"/></div>
+        </div>
+        <div class="form-group"><label>Observações / Matérias</label><textarea id="et-notes-${t.id}" rows="3">${t.notes}</textarea></div>
+        <div style="display:flex;gap:.5rem;flex-wrap:wrap;margin-bottom:.5rem">
+          ${Object.keys(PRI_STYLE).map(p=>`<button class="btn btn-sm" style="background:${PRI_STYLE[p].bg};color:${PRI_STYLE[p].text};border-color:${PRI_STYLE[p].border};${t.pri===p?'':'opacity:.5'}" onclick="quickSetPri('${day}','${t.id}','${p}')">${p}</button>`).join('')}
+        </div>
+        <div style="display:flex;gap:.5rem">
+          <button class="btn btn-primary btn-sm" onclick="saveTask('${day}','${t.id}')">Salvar</button>
+          <button class="btn btn-ghost btn-sm" onclick="document.getElementById('edit-form-${t.id}').classList.add('hidden')">Cancelar</button>
+        </div>
+      </div>
+      <div style="display:flex;gap:.5rem">
+        <button class="btn btn-ghost btn-sm" onclick="document.getElementById('edit-form-${t.id}').classList.remove('hidden')">✏️ Editar</button>
+        <button class="btn btn-danger btn-sm" onclick="deleteTask('${day}','${t.id}')">🗑️</button>
+      </div>
+    </div>
+  </div>`;
+}
+
+function toggleTaskExpand(id, day){
+  const body = document.getElementById('tb-'+id);
+  if(body) body.classList.toggle('hidden');
+}
+function toggleTask(day, id){
+  const t = (routine[day]||[]).find(x=>x.id===id);
+  if(!t) return;
+  if(!t.done){ xp+=10; ss('rp_xp',xp); updateXpUI(); }
+  t.done=!t.done; save(); renderRotina(); renderDashboard();
+}
+function deleteTask(day, id){
+  routine[day]=(routine[day]||[]).filter(x=>x.id!==id);
+  save(); renderRotina(); renderDashboard();
+}
+function saveTask(day, id){
+  const t=(routine[day]||[]).find(x=>x.id===id);
+  if(!t) return;
+  t.title=document.getElementById('et-title-'+id).value||t.title;
+  t.time=document.getElementById('et-time-'+id).value||t.time;
+  t.notes=document.getElementById('et-notes-'+id).value;
+  save(); renderRotina();
+}
+function quickSetPri(day, id, p){
+  const t=(routine[day]||[]).find(x=>x.id===id);
+  if(t){ t.pri=p; save(); renderRotina(); }
+}
+function resetWeek(){
+  Object.keys(routine).forEach(d=>{ routine[d]=(routine[d]||[]).map(t=>({...t,done:false})); });
+  xp+=100; streak++; save(); updateXpUI(); renderDashboard(); renderRotina();
+  alert('Semana resetada! +100xp 🎉');
+}
+
+// ============================================================
+// ESTUDOS
+// ============================================================
+function renderEstudos(){
+  const total = studySess.reduce((s,x)=>s+x.hours,0);
+  const weekGoal = 40;
+  const now = new Date(); const sow = new Date(now); sow.setDate(now.getDate()-now.getDay());
+  const weekSess = studySess.filter(s=>new Date(s.date)>=sow);
+  const weekH = weekSess.reduce((s,x)=>s+x.hours,0);
+  const bySubj = studySess.reduce((acc,s)=>{acc[s.subject]=(acc[s.subject]||0)+s.hours;return acc;},{});
+  const subjects = Object.entries(bySubj).sort((a,b)=>b[1]-a[1]);
+  const SCOLS = ['#3b82f6','#8b5cf6','#10b981','#f59e0b','#ef4444','#06b6d4','#ec4899','#6366f1'];
+
+  document.getElementById('estudos-content').innerHTML = `
+  <div class="grid-4 section">
+    <div class="stat-card" style="background:linear-gradient(135deg,#3b82f6,#4f46e5)">
+      <div class="stat-icon">📚</div><div class="stat-value">${total}h</div><div class="stat-label">Horas totais</div>
+    </div>
+    <div class="stat-card" style="background:linear-gradient(135deg,#10b981,#0891b2)">
+      <div class="stat-icon">📅</div><div class="stat-value">${weekH}h</div><div class="stat-label">Esta semana</div>
+    </div>
+    <div class="stat-card" style="background:linear-gradient(135deg,#8b5cf6,#ec4899)">
+      <div class="stat-icon">🎯</div><div class="stat-value">${weekGoal}h</div><div class="stat-label">Meta semanal</div>
+    </div>
+    <div class="stat-card" style="background:linear-gradient(135deg,#f59e0b,#ef4444)">
+      <div class="stat-icon">📖</div><div class="stat-value">${subjects.length}</div><div class="stat-label">Matérias</div>
+    </div>
+  </div>
+  <div class="card section">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:.5rem">
+      <div class="card-title" style="margin:0">Meta semanal</div>
+      <span style="font-size:13px;color:#6b7280">${weekH}/${weekGoal}h</span>
+    </div>
+    <div class="progress-bar" style="height:12px"><div class="progress-fill" style="background:linear-gradient(90deg,#4f46e5,#8b5cf6);width:${Math.min(100,Math.round(weekH/weekGoal*100))}%"></div></div>
+    <div style="font-size:12px;color:#9ca3af;margin-top:4px">${Math.min(100,Math.round(weekH/weekGoal*100))}% da meta</div>
+  </div>
+  ${subjects.length>0?`<div class="card section">
+    <div class="card-title">Horas por matéria</div>
+    ${subjects.slice(0,8).map(([sub,h],i)=>`
+    <div style="display:flex;align-items:center;gap:.75rem;margin-bottom:.6rem">
+      <div style="width:10px;height:10px;border-radius:50%;background:${SCOLS[i%SCOLS.length]};flex-shrink:0"></div>
+      <span style="font-size:13px;color:#374151;flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${sub}</span>
+      <div class="progress-bar" style="width:100px;height:6px"><div class="progress-fill" style="background:${SCOLS[i%SCOLS.length]};width:${Math.round(h/total*100)}%"></div></div>
+      <span style="font-size:12px;color:#6b7280;width:30px;text-align:right">${h}h</span>
+    </div>`).join('')}
+  </div>`:''}
+  <div style="display:flex;justify-content:flex-end;margin-bottom:.75rem">
+    <button class="btn btn-primary" onclick="showAddStudy()">+ Registrar sessão</button>
+  </div>
+  <div id="add-study-form" class="hidden card section">
+    <div style="font-weight:700;margin-bottom:.75rem">Nova sessão de estudo</div>
+    <div class="form-group"><label>Matéria</label><input id="ss-subj" placeholder="Ex: Português, Matemática, Raciocínio Lógico"/></div>
+    <div class="form-row">
+      <div><label>Horas estudadas</label><input id="ss-hours" type="number" min="0.5" max="12" step="0.5" value="1"/></div>
+      <div><label>Data</label><input id="ss-date" type="date" value="${new Date().toISOString().split('T')[0]}"/></div>
+    </div>
+    <div class="form-group"><label>Anotações</label><textarea id="ss-notes" rows="2" placeholder="O que estudou nessa sessão?"></textarea></div>
+    <div style="display:flex;gap:.5rem">
+      <button class="btn btn-primary btn-sm" onclick="addStudySession()">Registrar</button>
+      <button class="btn btn-ghost btn-sm" onclick="document.getElementById('add-study-form').classList.add('hidden')">Cancelar</button>
+    </div>
+  </div>
+  ${studySess.length>0?`<div class="card">
+    <div class="card-title">Histórico recente</div>
+    ${studySess.slice(0,10).map(s=>`
+    <div style="display:flex;align-items:center;justify-content:space-between;padding:.6rem 0;border-bottom:1px solid #f3f4f6">
+      <div>
+        <div style="font-size:13px;font-weight:600;color:#374151">${s.subject}</div>
+        ${s.notes?`<div style="font-size:11px;color:#9ca3af;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:300px">${s.notes}</div>`:''}
+      </div>
+      <div style="display:flex;align-items:center;gap:.75rem">
+        <span style="font-size:12px;color:#9ca3af">${s.date}</span>
+        <span style="font-size:14px;font-weight:700;color:#4f46e5">${s.hours}h</span>
+        <button onclick="deleteStudy('${s.id}')" style="background:none;border:none;cursor:pointer;color:#d1d5db;font-size:14px">✕</button>
+      </div>
+    </div>`).join('')}
+  </div>`:''}`;
+}
+function showAddStudy(){ document.getElementById('add-study-form').classList.remove('hidden'); }
+function addStudySession(){
+  const subj = document.getElementById('ss-subj').value.trim();
+  if(!subj) return;
+  studySess.unshift({id:Date.now().toString(),subject:subj,hours:parseFloat(document.getElementById('ss-hours').value)||1,date:document.getElementById('ss-date').value,notes:document.getElementById('ss-notes').value});
+  save(); renderEstudos();
+}
+function deleteStudy(id){ studySess=studySess.filter(s=>s.id!==id); save(); renderEstudos(); }
+
+// ============================================================
+// NOTAS
+// ============================================================
+const NOTE_COLORS = ['#fffbeb','#dbeafe','#dcfce7','#fce7f3','#fef3c7','#ede9fe'];
+let notesSearch='';
+function renderNotas(){
+  const filtered = notes.filter(n=>(n.title+n.content).toLowerCase().includes(notesSearch.toLowerCase()))
+    .sort((a,b)=>(b.pinned?1:0)-(a.pinned?1:0));
+  document.getElementById('notas-content').innerHTML = `
+  <div style="display:flex;gap:.75rem;margin-bottom:1rem">
+    <input type="text" placeholder="🔍 Pesquisar anotações..." value="${notesSearch}" oninput="notesSearch=this.value;renderNotas()" style="flex:1"/>
+    <button class="btn btn-primary" onclick="showAddNote()">+ Nova nota</button>
+  </div>
+  <div id="add-note-form" class="hidden card section">
+    <div style="font-weight:700;margin-bottom:.75rem">Nova anotação</div>
+    <div class="form-group"><label>Título</label><input id="nn-title" placeholder="Título da nota"/></div>
+    <div class="form-group"><label>Conteúdo</label><textarea id="nn-content" rows="4" placeholder="Escreva sua anotação..."></textarea></div>
+    <div style="display:flex;align-items:center;gap:.75rem;margin-bottom:.75rem;flex-wrap:wrap">
+      <div style="display:flex;gap:5px">${NOTE_COLORS.map(c=>`<div class="color-pick" id="ncp-${c.replace('#','')}" style="background:${c}" onclick="selectNoteColor('${c}')"></div>`).join('')}</div>
+      ${Object.keys(PRI_STYLE).map(p=>`<button class="btn btn-sm" id="nnpri-${p}" style="background:${PRI_STYLE[p].bg};color:${PRI_STYLE[p].text};border-color:${PRI_STYLE[p].border}" onclick="selectNotePri('${p}')">${p}</button>`).join('')}
+      <button class="btn btn-sm" id="nn-pin-btn" onclick="toggleNotePin()" style="background:#fff7ed;color:#ea580c;border-color:#fed7aa">📌 Fixar</button>
+    </div>
+    <div style="display:flex;gap:.5rem">
+      <button class="btn btn-primary btn-sm" onclick="addNote()">Salvar</button>
+      <button class="btn btn-ghost btn-sm" onclick="document.getElementById('add-note-form').classList.add('hidden')">Cancelar</button>
+    </div>
+  </div>
+  <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:.75rem">
+    ${filtered.length===0?'<div style="grid-column:1/-1;text-align:center;padding:3rem;color:#9ca3af">Nenhuma anotação</div>':filtered.map(n=>`
+    <div class="note-card" style="background:${n.color}">
+      ${n.pinned?'<div class="note-pin">📌</div>':''}
+      <div style="display:flex;gap:.5rem;margin-bottom:.35rem">
+        <span class="tag" style="background:${PRI_STYLE[n.pri]?.bg||'#f9fafb'};color:${PRI_STYLE[n.pri]?.text||'#374151'};border-color:${PRI_STYLE[n.pri]?.border||'#e5e7eb'}">${n.pri}</span>
+        <span style="font-size:11px;color:#9ca3af;align-self:center">${n.date}</span>
+      </div>
+      ${n.title?`<h4>${n.title}</h4>`:''}
+      <p style="margin-top:.25rem">${n.content}</p>
+      <div style="display:flex;gap:.5rem;margin-top:.6rem">
+        <button onclick="toggleNotePin2('${n.id}')" style="background:none;border:none;cursor:pointer;font-size:14px;color:#9ca3af" title="Fixar">📌</button>
+        <button onclick="deleteNote('${n.id}')" style="background:none;border:none;cursor:pointer;font-size:14px;color:#9ca3af" title="Excluir">🗑️</button>
+      </div>
+    </div>`).join('')}
+  </div>`;
+}
+let newNoteColor='#fffbeb', newNotePri='moderado', newNotePinned=false;
+function showAddNote(){ newNoteColor='#fffbeb'; newNotePri='moderado'; newNotePinned=false; document.getElementById('add-note-form').classList.remove('hidden'); }
+function selectNoteColor(c){ newNoteColor=c; }
+function selectNotePri(p){ newNotePri=p; }
+function toggleNotePin(){ newNotePinned=!newNotePinned; const b=document.getElementById('nn-pin-btn'); b.style.background=newNotePinned?'#fef9c3':'#fff7ed'; }
+function addNote(){
+  const title=document.getElementById('nn-title').value.trim();
+  const content=document.getElementById('nn-content').value.trim();
+  if(!title&&!content) return;
+  notes.unshift({id:Date.now().toString(),title,content,pri:newNotePri,color:newNoteColor,pinned:newNotePinned,date:new Date().toLocaleDateString('pt-BR')});
+  save(); renderNotas();
+}
+function deleteNote(id){ notes=notes.filter(n=>n.id!==id); save(); renderNotas(); }
+function toggleNotePin2(id){ const n=notes.find(x=>x.id===id); if(n){ n.pinned=!n.pinned; save(); renderNotas(); } }
+
+// ============================================================
+// TAF
+// ============================================================
+function renderTaf(){
+  const totalKm = tafRuns.reduce((s,r)=>s+(parseFloat(r.distance)||0),0);
+  document.getElementById('taf-content').innerHTML = `
+  <div class="grid-3 section">
+    <div class="stat-card" style="background:linear-gradient(135deg,#f97316,#ef4444)">
+      <div class="stat-icon">🏃</div><div class="stat-value">${tafRuns.length}</div><div class="stat-label">Treinos</div>
+    </div>
+    <div class="stat-card" style="background:linear-gradient(135deg,#3b82f6,#06b6d4)">
+      <div class="stat-icon">📍</div><div class="stat-value">${totalKm.toFixed(1)}km</div><div class="stat-label">Distância total</div>
+    </div>
+    <div class="stat-card" style="background:linear-gradient(135deg,#10b981,#0891b2)">
+      <div class="stat-icon">📅</div><div class="stat-value">${tafRuns[0]?.date||'—'}</div><div class="stat-label">Último treino</div>
+    </div>
+  </div>
+  <div style="display:flex;justify-content:flex-end;margin-bottom:.75rem">
+    <button class="btn btn-orange" onclick="showAddTaf()">+ Registrar treino</button>
+  </div>
+  <div id="add-taf-form" class="hidden card section">
+    <div style="font-weight:700;margin-bottom:.75rem">Novo treino</div>
+    <div style="display:flex;gap:.5rem;margin-bottom:.75rem" id="taf-type-btns">
+      <button class="btn btn-orange btn-sm" onclick="selectTafType('corrida',this)">🏃 Corrida</button>
+      <button class="btn btn-ghost btn-sm" onclick="selectTafType('academia',this)">💪 Academia</button>
+      <button class="btn btn-ghost btn-sm" onclick="selectTafType('recuperacao',this)">🛌 Recuperação</button>
+    </div>
+    <div id="taf-corrida-fields">
+      <div class="form-row">
+        <div><label>Distância (km)</label><input id="tf-dist" type="number" step="0.1" min="0"/></div>
+        <div><label>Tempo (min)</label><input id="tf-time" type="number" min="0"/></div>
+      </div>
+    </div>
+    <div id="taf-academia-fields" class="hidden">
+      <div class="form-row">
+        <div><label>Flexões</label><input id="tf-flex" type="number" min="0"/></div>
+        <div><label>Barra</label><input id="tf-barra" type="number" min="0"/></div>
+      </div>
+    </div>
+    <div class="form-group"><label>Data</label><input id="tf-date" type="date" value="${new Date().toISOString().split('T')[0]}"/></div>
+    <div class="form-group"><label>Observações</label><textarea id="tf-notes" rows="2"></textarea></div>
+    <div style="display:flex;gap:.5rem">
+      <button class="btn btn-orange btn-sm" onclick="addTaf()">Registrar</button>
+      <button class="btn btn-ghost btn-sm" onclick="document.getElementById('add-taf-form').classList.add('hidden')">Cancelar</button>
+    </div>
+  </div>
+  ${tafRuns.length>0?`<div class="card">
+    <div class="card-title">Histórico de treinos</div>
+    ${tafRuns.slice(0,12).map(r=>{
+      const pace = r.distance&&r.time&&parseFloat(r.time)>0 ? (parseFloat(r.time)/parseFloat(r.distance)).toFixed(1)+' min/km' : '';
+      const bg = r.type==='corrida'?'#fff7ed':r.type==='academia'?'#f0fdf4':'#eff6ff';
+      const bc = r.type==='corrida'?'#fed7aa':r.type==='academia'?'#bbf7d0':'#bfdbfe';
+      const icon = r.type==='corrida'?'🏃':r.type==='academia'?'💪':'🛌';
+      return `<div style="display:flex;align-items:center;gap:.75rem;padding:.65rem;border-radius:10px;border:1px solid ${bc};background:${bg};margin-bottom:6px">
+        <span style="font-size:20px">${icon}</span>
+        <div style="flex:1">
+          <span style="font-size:13px;font-weight:600;color:#374151;text-transform:capitalize">${r.type}</span>
+          ${r.distance?`<span style="font-size:12px;color:#6b7280;margin-left:.5rem">${r.distance}km</span>`:''}
+          ${r.time?`<span style="font-size:12px;color:#6b7280;margin-left:.5rem">${r.time}min</span>`:''}
+          ${pace?`<span style="font-size:12px;color:#f97316;margin-left:.5rem">${pace}</span>`:''}
+          ${r.flexoes?`<span style="font-size:12px;color:#6b7280;margin-left:.5rem">Flex: ${r.flexoes}</span>`:''}
+          ${r.barra?`<span style="font-size:12px;color:#6b7280;margin-left:.5rem">Barra: ${r.barra}</span>`:''}
+          ${r.notes?`<div style="font-size:11px;color:#9ca3af">${r.notes}</div>`:''}
+        </div>
+        <span style="font-size:12px;color:#9ca3af">${r.date}</span>
+        <button onclick="deleteTaf('${r.id}')" style="background:none;border:none;cursor:pointer;color:#d1d5db;font-size:14px">✕</button>
+      </div>`;
+    }).join('')}
+  </div>`:''}`;
+}
+let tafType='corrida';
+function showAddTaf(){ document.getElementById('add-taf-form').classList.remove('hidden'); }
+function selectTafType(t, btn){
+  tafType=t;
+  document.querySelectorAll('#taf-type-btns button').forEach(b=>{ b.className='btn btn-ghost btn-sm'; });
+  btn.className='btn btn-orange btn-sm';
+  document.getElementById('taf-corrida-fields').classList.toggle('hidden', t!=='corrida');
+  document.getElementById('taf-academia-fields').classList.toggle('hidden', t!=='academia');
+}
+function addTaf(){
+  const r={id:Date.now().toString(),type:tafType,date:document.getElementById('tf-date').value,notes:document.getElementById('tf-notes').value};
+  if(tafType==='corrida'){ r.distance=document.getElementById('tf-dist').value; r.time=document.getElementById('tf-time').value; }
+  if(tafType==='academia'){ r.flexoes=document.getElementById('tf-flex').value; r.barra=document.getElementById('tf-barra').value; }
+  tafRuns.unshift(r); save(); renderTaf();
+}
+function deleteTaf(id){ tafRuns=tafRuns.filter(r=>r.id!==id); save(); renderTaf(); }
+
+// ============================================================
+// METAS
+// ============================================================
+function renderMetas(){
+  document.getElementById('metas-content').innerHTML = `
+  <div style="display:flex;justify-content:flex-end;margin-bottom:.75rem">
+    <button class="btn btn-primary" onclick="showAddGoal()">+ Nova meta</button>
+  </div>
+  <div id="add-goal-form" class="hidden card section">
+    <div style="font-weight:700;margin-bottom:.75rem">Nova meta</div>
+    <div class="form-group"><label>Título da meta</label><input id="gn-title" placeholder="Ex: Aprovação no concurso"/></div>
+    <div style="display:flex;gap:.5rem;margin-bottom:.75rem">
+      ${['objetivo','estudo','taf','pessoal'].map(t=>`<button class="btn btn-sm btn-ghost" id="gt-${t}" onclick="selectGoalType('${t}')">${t}</button>`).join('')}
+    </div>
+    <div class="form-group">
+      <label id="gn-prog-label">Progresso: 0%</label>
+      <input type="range" id="gn-prog" min="0" max="100" value="0" oninput="document.getElementById('gn-prog-label').textContent='Progresso: '+this.value+'%'"/>
+    </div>
+    <div class="form-group"><label>Detalhes</label><textarea id="gn-notes" rows="2" placeholder="Descreva sua meta..."></textarea></div>
+    <div style="display:flex;gap:.5rem">
+      <button class="btn btn-primary btn-sm" onclick="addGoal()">Salvar</button>
+      <button class="btn btn-ghost btn-sm" onclick="document.getElementById('add-goal-form').classList.add('hidden')">Cancelar</button>
+    </div>
+  </div>
+  <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:.75rem">
+    ${goals.map(g=>{
+      const col = g.prog>=100?'#10b981':g.prog>=50?'#4f46e5':'#f59e0b';
+      return `<div class="card">
+        <div style="display:flex;align-items:start;justify-content:space-between;margin-bottom:.5rem">
+          <div>
+            <div style="font-weight:700;font-size:15px;color:#111">${g.title}</div>
+            <span class="tag" style="background:#eef2ff;color:#4f46e5;border-color:#c7d2fe;margin-top:3px">${g.type}</span>
+          </div>
+          <button onclick="deleteGoal('${g.id}')" style="background:none;border:none;cursor:pointer;color:#d1d5db;font-size:14px">✕</button>
+        </div>
+        ${g.notes?`<p style="font-size:12px;color:#6b7280;margin-bottom:.75rem">${g.notes}</p>`:''}
+        <div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:4px">
+          <span style="color:#9ca3af">Progresso</span>
+          <span style="font-weight:700;color:${col}">${g.prog}%</span>
+        </div>
+        <div class="progress-bar" style="height:10px;margin-bottom:.5rem"><div class="progress-fill" style="background:${col};width:${g.prog}%"></div></div>
+        <input type="range" min="0" max="100" value="${g.prog}" oninput="updateGoalProg('${g.id}',this.value)" style="width:100%;margin-top:.25rem"/>
+      </div>`;
+    }).join('')}
+    ${goals.length===0?'<div style="grid-column:1/-1;text-align:center;padding:3rem;color:#9ca3af">Nenhuma meta cadastrada</div>':''}
+  </div>`;
+}
+let goalType='objetivo';
+function showAddGoal(){ document.getElementById('add-goal-form').classList.remove('hidden'); }
+function selectGoalType(t){ goalType=t; document.querySelectorAll('[id^="gt-"]').forEach(b=>b.className='btn btn-ghost btn-sm'); document.getElementById('gt-'+t).className='btn btn-primary btn-sm'; }
+function addGoal(){
+  const title=document.getElementById('gn-title').value.trim();
+  if(!title) return;
+  goals.push({id:Date.now().toString(),title,type:goalType,prog:parseInt(document.getElementById('gn-prog').value)||0,notes:document.getElementById('gn-notes').value});
+  save(); renderMetas();
+}
+function deleteGoal(id){ goals=goals.filter(g=>g.id!==id); save(); renderMetas(); }
+function updateGoalProg(id, v){ const g=goals.find(x=>x.id===id); if(g){ g.prog=parseInt(v); save(); renderMetas(); } }
+
+// ============================================================
+// FOCUS MODE
+// ============================================================
+let focusMin=50, focusSec=0, focusRunning=false, focusInterval=null;
+function toggleFocus(on){
+  document.getElementById('focus-overlay').classList.toggle('hidden', !on);
+  if(!on){ clearInterval(focusInterval); focusRunning=false; }
+}
+function updateFocusDisplay(){ document.getElementById('focus-display').textContent = String(focusMin).padStart(2,'0')+':'+String(focusSec).padStart(2,'0'); }
+function toggleFocusTimer(){
+  const btn=document.getElementById('focus-play-btn');
+  if(focusRunning){ clearInterval(focusInterval); focusRunning=false; btn.textContent='▶ Iniciar'; return; }
+  focusRunning=true; btn.textContent='⏸ Pausar';
+  focusInterval=setInterval(()=>{
+    if(focusSec===0){ if(focusMin===0){ clearInterval(focusInterval); focusRunning=false; btn.textContent='▶ Iniciar'; return; } focusMin--; focusSec=59; } else focusSec--;
+    updateFocusDisplay();
+  },1000);
+}
+function resetFocusTimer(){ clearInterval(focusInterval); focusRunning=false; focusMin=50; focusSec=0; updateFocusDisplay(); document.getElementById('focus-play-btn').textContent='▶ Iniciar'; }
+function setSound(s, btn){ document.querySelectorAll('.sound-btn').forEach(b=>b.classList.remove('active')); btn.classList.add('active'); }
+
+// ============================================================
+// AI CHAT
+// ============================================================
+function saveWorkerUrl(){
+  workerUrl = document.getElementById('worker-url-input').value.trim();
+  save();
+  document.getElementById('ai-status').textContent = workerUrl ? '✅ Worker configurado' : 'Configure a URL abaixo';
+  alert(workerUrl ? 'URL salva! A IA está pronta para usar.' : 'URL removida.');
+}
+function sendSuggestion(el){ document.getElementById('chat-input').value=el.textContent; sendChat(); }
+async function sendChat(){
+  const input = document.getElementById('chat-input');
+  const msg = input.value.trim();
+  if(!msg) return;
+  if(!workerUrl){ appendChat('ai','⚠️ Configure a URL do Cloudflare Worker primeiro para usar a IA.'); return; }
+  input.value='';
+  appendChat('user', msg);
+  chatHistory.push({role:'user',content:msg});
+  const typing = appendTyping();
+
+  const totalStudy = studySess.reduce((s,x)=>s+x.hours,0);
+  const bySubj = studySess.reduce((acc,s)=>{acc[s.subject]=(acc[s.subject]||0)+s.hours;return acc;},{});
+  const routineSummary = Object.entries(routine).map(([day,tasks])=>
+    `${day}: ${tasks.map(t=>`${t.time} - ${t.title}[${t.done?'✓':'○'}]`).join('; ')}`).join('\n');
+
+  const systemPrompt = `Você é um assistente de produtividade para um estudante brasileiro que estuda para concurso/TAF.
+
+ROTINA ATUAL:
+${routineSummary}
+
+ESTUDOS: ${totalStudy}h total. Matérias: ${Object.entries(bySubj).map(([s,h])=>s+': '+h+'h').join(', ')||'Nenhuma'}
+
+SUAS FUNÇÕES: Analisar rotina, sugerir melhorias, criar planos de estudo, calcular estatísticas, motivar, identificar conflitos, sugerir técnicas de estudo.
+
+ESTILO: Direto, prático, motivador. Use emojis. Português brasileiro. Use bullet points em listas.`;
+
+  try {
+    const res = await fetch(workerUrl, {
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:1000,system:systemPrompt,messages:chatHistory})
+    });
+    const data = await res.json();
+    const text = data.content?.map(c=>c.text||'').join('')||'Erro ao processar resposta.';
+    typing.remove();
+    appendChat('ai', text);
+    chatHistory.push({role:'assistant',content:text});
+  } catch(e) {
+    typing.remove();
+    appendChat('ai','❌ Erro de conexão. Verifique a URL do Worker e tente novamente.');
   }
-  tick();
-  setInterval(tick, 1000);
+}
+function appendChat(role, text){
+  const box = document.getElementById('chat-box');
+  const div = document.createElement('div');
+  div.className = 'chat-msg '+role;
+  div.textContent = text;
+  box.appendChild(div);
+  box.scrollTop = box.scrollHeight;
+  return div;
+}
+function appendTyping(){
+  const box = document.getElementById('chat-box');
+  const div = document.createElement('div');
+  div.className = 'typing';
+  div.innerHTML = '<span></span><span></span><span></span>';
+  box.appendChild(div);
+  box.scrollTop = box.scrollHeight;
+  return div;
 }
 
-// ============================================================
-// UTILS
-// ============================================================
-function escHtml(str) {
-  return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
-}
-
-// close modal on overlay click
-document.getElementById('modal').addEventListener('click', function(e) {
-  if (e.target === this) closeModal();
-});
-document.getElementById('reset-modal').addEventListener('click', function(e) {
-  if (e.target === this) closeResetModal();
-});
-
-// Enter to save note
+// Enter to send chat
 document.addEventListener('keydown', e => {
-  if (e.key === 'Escape') { closeModal(); closeResetModal(); }
+  if(e.key==='Escape') toggleFocus(false);
 });
-
-// ============================================================
-// BOOT
-// ============================================================
-init();
 </script>
 </body>
 </html>
