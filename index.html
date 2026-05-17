@@ -141,7 +141,78 @@ label{font-size:12px;color:#6b7280;display:block;margin-bottom:4px;font-weight:5
 .day-tab.active{background:#4f46e5;color:#fff;border-color:#4f46e5}
 .day-tab.today{box-shadow:0 0 0 2px #a5b4fc}
 .day-tab .day-pct{font-size:10px;opacity:.7;display:block}
-/* SCROLLBAR */
+/* =====================================================
+   FINANÇAS — Estilos
+   ===================================================== */
+/* Cards de resumo financeiro */
+.fin-summary-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:.875rem;margin-bottom:1.25rem}
+@media(max-width:700px){.fin-summary-grid{grid-template-columns:repeat(2,1fr)}}
+.fin-card{border-radius:16px;padding:1.1rem 1rem;border:1px solid;position:relative;overflow:hidden;transition:transform .15s}
+.fin-card:active{transform:scale(.98)}
+.fin-card-label{font-size:11px;font-weight:600;letter-spacing:.04em;text-transform:uppercase;opacity:.7;margin-bottom:.35rem}
+.fin-card-value{font-size:22px;font-weight:800;line-height:1.1;letter-spacing:-.5px}
+.fin-card-sub{font-size:11px;opacity:.65;margin-top:.25rem}
+.fin-card-icon{position:absolute;right:.85rem;top:.85rem;font-size:22px;opacity:.25}
+/* Cards por cor */
+.fin-c-green{background:linear-gradient(135deg,#d1fae5,#a7f3d0);border-color:#6ee7b7;color:#065f46}
+.fin-c-blue {background:linear-gradient(135deg,#dbeafe,#bfdbfe);border-color:#93c5fd;color:#1e3a8a}
+.fin-c-red  {background:linear-gradient(135deg,#fee2e2,#fecaca);border-color:#f87171;color:#7f1d1d}
+.fin-c-free-pos{background:linear-gradient(135deg,#d1fae5,#6ee7b7);border-color:#34d399;color:#064e3b}
+.fin-c-free-neg{background:linear-gradient(135deg,#fee2e2,#f87171);border-color:#ef4444;color:#7f1d1d}
+/* Layout principal finanças */
+.fin-main-grid{display:grid;grid-template-columns:1fr 1fr;gap:1rem}
+@media(max-width:700px){.fin-main-grid{grid-template-columns:1fr}}
+/* Formulário de configuração mensal */
+.fin-config-card{background:#fff;border-radius:16px;border:1px solid var(--border);box-shadow:var(--card-shadow);padding:1.25rem}
+.fin-config-title{font-size:14px;font-weight:700;color:#111;margin-bottom:1rem;display:flex;align-items:center;gap:.5rem}
+.fin-input-group{margin-bottom:.85rem}
+.fin-input-group label{font-size:12px;color:#6b7280;font-weight:600;display:block;margin-bottom:.3rem}
+.fin-input-group input{width:100%;padding:.7rem .9rem;border:1.5px solid #e5e7eb;border-radius:10px;font-size:15px;font-weight:600;outline:none;transition:border .15s;font-family:inherit;background:#f9fafb;color:#111}
+.fin-input-group input:focus{border-color:#4f46e5;background:#fff;box-shadow:0 0 0 3px rgba(79,70,229,.08)}
+.fin-input-group input[readonly]{background:#f0fdf4;border-color:#6ee7b7;color:#065f46;cursor:default}
+.fin-input-group input[readonly].neg{background:#fef2f2;border-color:#fca5a5;color:#b91c1c}
+/* Botão salvar config */
+.fin-save-btn{width:100%;padding:.8rem;background:linear-gradient(135deg,#4f46e5,#7c3aed);color:#fff;border:none;border-radius:12px;font-size:14px;font-weight:700;cursor:pointer;transition:opacity .15s;min-height:48px}
+.fin-save-btn:hover{opacity:.9}
+/* Formulário de gasto diário */
+.fin-gasto-form{background:#fff;border-radius:16px;border:1px solid var(--border);box-shadow:var(--card-shadow);padding:1.25rem}
+.fin-gasto-row{display:flex;gap:.5rem;margin-bottom:.75rem}
+.fin-gasto-row input{flex:1;padding:.75rem .9rem;border:1.5px solid #e5e7eb;border-radius:10px;font-size:14px;outline:none;font-family:inherit;background:#f9fafb;transition:border .15s;min-height:48px}
+.fin-gasto-row input:focus{border-color:#4f46e5;background:#fff;box-shadow:0 0 0 3px rgba(79,70,229,.08)}
+.fin-gasto-row input[type=number]{max-width:130px}
+.fin-add-btn{padding:.75rem 1.1rem;background:#4f46e5;color:#fff;border:none;border-radius:10px;font-size:14px;font-weight:700;cursor:pointer;min-height:48px;transition:background .15s;white-space:nowrap}
+.fin-add-btn:hover{background:#3730a3}
+/* Extrato */
+.fin-extrato{background:#fff;border-radius:16px;border:1px solid var(--border);box-shadow:var(--card-shadow);padding:1.25rem;margin-top:1rem}
+.fin-extrato-title{font-size:14px;font-weight:700;color:#111;margin-bottom:.875rem;display:flex;align-items:center;justify-content:space-between}
+.fin-extrato-item{display:flex;align-items:center;gap:.75rem;padding:.65rem .5rem;border-bottom:1px solid #f3f4f6;transition:background .1s}
+.fin-extrato-item:last-child{border-bottom:none}
+.fin-extrato-item:hover{background:#fafafa;border-radius:8px}
+.fin-extrato-desc{flex:1;font-size:13px;font-weight:600;color:#374151}
+.fin-extrato-date{font-size:11px;color:#9ca3af}
+.fin-extrato-val{font-size:14px;font-weight:800;color:#ef4444}
+.fin-extrato-del{background:none;border:none;cursor:pointer;color:#d1d5db;font-size:16px;padding:4px 6px;border-radius:6px;transition:color .15s;line-height:1}
+.fin-extrato-del:hover{color:#ef4444;background:#fef2f2}
+.fin-empty{text-align:center;padding:2rem;color:#9ca3af;font-size:13px}
+/* Tabs internas do histórico */
+.fin-inner-tabs{display:flex;gap:4px;background:#f3f4f6;border-radius:10px;padding:3px;margin-bottom:1rem}
+.fin-inner-tab{flex:1;padding:7px 8px;border-radius:8px;border:none;background:transparent;cursor:pointer;font-size:12px;font-weight:600;color:#6b7280;transition:all .15s;text-align:center}
+.fin-inner-tab.active{background:#fff;color:#4f46e5;box-shadow:0 1px 3px rgba(0,0,0,.1)}
+/* Histórico de meses */
+.fin-hist-item{border-radius:12px;border:1px solid #e5e7eb;padding:.875rem 1rem;margin-bottom:.5rem;background:#fafafa}
+.fin-hist-month{font-size:13px;font-weight:700;color:#374151;margin-bottom:.5rem}
+.fin-hist-row{display:flex;justify-content:space-between;font-size:12px;color:#6b7280;margin-bottom:.2rem}
+.fin-hist-row span:last-child{font-weight:700;color:#374151}
+.fin-hist-saldo-pos{color:#059669!important}
+.fin-hist-saldo-neg{color:#dc2626!important}
+/* Categoria badge */
+.fin-cat-badge{display:inline-block;padding:2px 8px;border-radius:99px;font-size:10px;font-weight:700;border:1px solid}
+/* Seletor de categoria */
+.fin-cat-select{padding:.75rem .9rem;border:1.5px solid #e5e7eb;border-radius:10px;font-size:13px;outline:none;font-family:inherit;background:#f9fafb;color:#374151;cursor:pointer;min-height:48px;transition:border .15s}
+.fin-cat-select:focus{border-color:#4f46e5;background:#fff}
+/* Tooltip do saldo */
+.fin-saldo-tip{font-size:11px;color:#6b7280;margin-top:.5rem;padding:.5rem .75rem;background:#f9fafb;border-radius:8px;border:1px solid #f3f4f6;line-height:1.5}
+
 ::-webkit-scrollbar{width:5px;height:5px}
 ::-webkit-scrollbar-track{background:transparent}
 ::-webkit-scrollbar-thumb{background:#d1d5db;border-radius:99px}
@@ -189,6 +260,7 @@ label{font-size:12px;color:#6b7280;display:block;margin-bottom:4px;font-weight:5
       <button class="nav-btn" onclick="goTab('taf')">🏃 <span>TAF</span></button>
       <button class="nav-btn" onclick="goTab('metas')">🎯 <span>Metas</span></button>
       <button class="nav-btn" onclick="goTab('ia')">🤖 <span>IA</span></button>
+      <button class="nav-btn" onclick="goTab('financas')">💰 <span>Finanças</span></button>
     </nav>
     <div class="header-right">
       <div class="xp-badge hide-mobile">
@@ -296,6 +368,14 @@ label{font-size:12px;color:#6b7280;display:block;margin-bottom:4px;font-weight:5
       </div>
     </div>
   </div>
+
+  <!-- =====================================================
+       ABA FINANÇAS — Adicionada ao RotinaPRO
+       ===================================================== -->
+  <div id="tab-financas" class="hidden">
+    <div id="financas-content"></div>
+  </div>
+
 </main>
 
 <script>
@@ -1142,6 +1222,341 @@ function appendTyping(){
 document.addEventListener('keydown', e => {
   if(e.key==='Escape') toggleFocus(false);
 });
+
+// ============================================================
+// FINANÇAS — Módulo completo
+// ============================================================
+
+// Categorias de gasto com cor e ícone
+const FIN_CATS = {
+  alimentacao: { label: 'Alimentação',  icon: '🍔', bg: '#fff7ed', text: '#c2410c', border: '#fed7aa' },
+  transporte:  { label: 'Transporte',   icon: '🚗', bg: '#eff6ff', text: '#1d4ed8', border: '#bfdbfe' },
+  lazer:       { label: 'Lazer',        icon: '🎮', bg: '#faf5ff', text: '#7c3aed', border: '#ddd6fe' },
+  saude:       { label: 'Saúde',        icon: '💊', bg: '#f0fdf4', text: '#15803d', border: '#bbf7d0' },
+  educacao:    { label: 'Educação',     icon: '📚', bg: '#eef2ff', text: '#4338ca', border: '#c7d2fe' },
+  outros:      { label: 'Outros',       icon: '📦', bg: '#f9fafb', text: '#374151', border: '#e5e7eb' },
+};
+
+// Retorna chave do mês atual: "2026-05"
+function finMonthKey(offset = 0) {
+  const d = new Date();
+  d.setMonth(d.getMonth() + offset);
+  return d.toISOString().slice(0, 7);
+}
+
+// Retorna label legível do mês: "Maio 2026"
+function finMonthLabel(key) {
+  const [y, m] = key.split('-');
+  const months = ['Janeiro','Fevereiro','Março','Abril','Maio','Junho',
+                  'Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
+  return `${months[parseInt(m)-1]} ${y}`;
+}
+
+// Formata valor em reais
+function finFmt(v) {
+  return 'R$ ' + parseFloat(v || 0).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+}
+
+// Carrega dados financeiros do localStorage
+function finLoad() {
+  try { return JSON.parse(localStorage.getItem('rp_financas') || '{}'); } catch { return {}; }
+}
+
+// Salva dados financeiros no localStorage
+function finSave(data) {
+  localStorage.setItem('rp_financas', JSON.stringify(data));
+}
+
+// Garante que o mês existe na estrutura
+function finEnsureMonth(data, key) {
+  if (!data[key]) {
+    data[key] = { renda: 0, investimentos: 0, fixos: 0, gastos: [] };
+  }
+  return data;
+}
+
+// Calcula saldo livre: renda - investimentos - fixos - soma dos gastos variáveis
+function finSaldoLivre(monthData) {
+  const gastoTotal = (monthData.gastos || []).reduce((s, g) => s + (parseFloat(g.valor) || 0), 0);
+  return (parseFloat(monthData.renda) || 0)
+       - (parseFloat(monthData.investimentos) || 0)
+       - (parseFloat(monthData.fixos) || 0)
+       - gastoTotal;
+}
+
+// Aba interna atual: 'atual' ou 'historico'
+let finSubTab = 'atual';
+
+// Renderiza a aba inteira de Finanças
+function renderFinancas() {
+  const data     = finLoad();
+  const key      = finMonthKey();
+  finEnsureMonth(data, key);
+  const mes      = data[key];
+  const saldo    = finSaldoLivre(mes);
+  const gastoVar = (mes.gastos || []).reduce((s, g) => s + (parseFloat(g.valor) || 0), 0);
+  const saldoPos = saldo >= 0;
+
+  document.getElementById('financas-content').innerHTML = `
+
+    <!-- ── CABEÇALHO DO MÊS ── -->
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem;flex-wrap:wrap;gap:.5rem">
+      <div>
+        <h2 style="font-size:20px;font-weight:800;color:#111">💰 Finanças</h2>
+        <p style="font-size:13px;color:#9ca3af;margin-top:2px">${finMonthLabel(key)}</p>
+      </div>
+      <div style="display:flex;gap:.5rem">
+        <button class="fin-inner-tab ${finSubTab==='atual'?'active':''}" onclick="finSetTab('atual')">📊 Mês Atual</button>
+        <button class="fin-inner-tab ${finSubTab==='historico'?'active':''}" onclick="finSetTab('historico')">🗂 Histórico</button>
+      </div>
+    </div>
+
+    <!-- ── CARDS DE RESUMO ── -->
+    <div class="fin-summary-grid">
+      <div class="fin-card fin-c-green">
+        <div class="fin-card-icon">💵</div>
+        <div class="fin-card-label">Ganho do Mês</div>
+        <div class="fin-card-value">${finFmt(mes.renda)}</div>
+        <div class="fin-card-sub">Renda bruta</div>
+      </div>
+      <div class="fin-card fin-c-blue">
+        <div class="fin-card-icon">📈</div>
+        <div class="fin-card-label">Investimentos</div>
+        <div class="fin-card-value">${finFmt(mes.investimentos)}</div>
+        <div class="fin-card-sub">${mes.renda > 0 ? Math.round(mes.investimentos/mes.renda*100)+'% da renda' : '—'}</div>
+      </div>
+      <div class="fin-card fin-c-red">
+        <div class="fin-card-icon">🧾</div>
+        <div class="fin-card-label">Gastos Variáveis</div>
+        <div class="fin-card-value">${finFmt(gastoVar)}</div>
+        <div class="fin-card-sub">${(mes.gastos||[]).length} lançamento(s)</div>
+      </div>
+      <div class="fin-card ${saldoPos ? 'fin-c-free-pos' : 'fin-c-free-neg'}">
+        <div class="fin-card-icon">${saldoPos ? '✅' : '⚠️'}</div>
+        <div class="fin-card-label">Saldo Livre</div>
+        <div class="fin-card-value">${finFmt(Math.abs(saldo))}</div>
+        <div class="fin-card-sub">${saldoPos ? 'disponível' : 'negativo — cuidado!'}</div>
+      </div>
+    </div>
+
+    <!-- ── CONTEÚDO POR SUB-ABA ── -->
+    <div id="fin-sub-content">
+      ${finSubTab === 'atual' ? finRenderAtual(mes, saldo, gastoVar, key) : finRenderHistorico(data, key)}
+    </div>
+  `;
+}
+
+// Renderiza sub-aba "Mês Atual"
+function finRenderAtual(mes, saldo, gastoVar, key) {
+  const saldoPos = saldo >= 0;
+  const gastos   = mes.gastos || [];
+
+  // Breakdown por categoria
+  const byCat = {};
+  gastos.forEach(g => { byCat[g.cat] = (byCat[g.cat] || 0) + parseFloat(g.valor || 0); });
+
+  return `
+  <div class="fin-main-grid">
+
+    <!-- COLUNA ESQUERDA: configuração mensal + gasto diário -->
+    <div>
+      <!-- Configuração do mês -->
+      <div class="fin-config-card" style="margin-bottom:1rem">
+        <div class="fin-config-title">⚙️ Configurar mês — ${finMonthLabel(key)}</div>
+
+        <div class="fin-input-group">
+          <label>💵 Ganho do Mês (R$)</label>
+          <input type="number" id="fin-renda" min="0" step="0.01" placeholder="0,00" value="${mes.renda || ''}"/>
+        </div>
+        <div class="fin-input-group">
+          <label>📈 Investimentos (R$)</label>
+          <input type="number" id="fin-invest" min="0" step="0.01" placeholder="0,00" value="${mes.investimentos || ''}"/>
+        </div>
+        <div class="fin-input-group">
+          <label>🧾 Gastos Fixos (R$) <span style="font-weight:400;color:#9ca3af">(aluguel, internet…)</span></label>
+          <input type="number" id="fin-fixos" min="0" step="0.01" placeholder="0,00" value="${mes.fixos || ''}"/>
+        </div>
+        <div class="fin-input-group">
+          <label>🟢 Saldo Base (calculado automaticamente)</label>
+          <input type="text" readonly id="fin-saldo-base-display"
+            value="${finFmt((parseFloat(mes.renda)||0) - (parseFloat(mes.investimentos)||0) - (parseFloat(mes.fixos)||0))}"
+            class="${((parseFloat(mes.renda)||0)-(parseFloat(mes.investimentos)||0)-(parseFloat(mes.fixos)||0)) < 0 ? 'neg' : ''}"/>
+          <div class="fin-saldo-tip">
+            Ganho − Investimentos − Fixos = base disponível antes dos gastos variáveis.<br>
+            <strong>Saldo livre real: ${finFmt(saldo)}</strong> (após ${finFmt(gastoVar)} em gastos variáveis)
+          </div>
+        </div>
+        <button class="fin-save-btn" onclick="finSalvarConfig()">💾 Salvar configuração do mês</button>
+      </div>
+
+      <!-- Registrar gasto variável -->
+      <div class="fin-gasto-form">
+        <div class="fin-config-title">➕ Registrar gasto do dia</div>
+        <div class="fin-gasto-row">
+          <input type="text" id="fin-desc" placeholder="Descrição (ex: iFood, Uber…)" maxlength="60"/>
+          <input type="number" id="fin-val" min="0.01" step="0.01" placeholder="R$"/>
+        </div>
+        <div style="display:flex;gap:.5rem;margin-bottom:.75rem">
+          <select id="fin-cat" class="fin-cat-select" style="flex:1">
+            ${Object.entries(FIN_CATS).map(([k,v])=>`<option value="${k}">${v.icon} ${v.label}</option>`).join('')}
+          </select>
+          <input type="date" id="fin-data" value="${new Date().toISOString().split('T')[0]}"
+            style="flex:1;padding:.75rem .9rem;border:1.5px solid #e5e7eb;border-radius:10px;font-size:13px;outline:none;background:#f9fafb;min-height:48px;font-family:inherit"/>
+        </div>
+        <button class="fin-add-btn" style="width:100%" onclick="finAddGasto('${key}')">+ Adicionar gasto</button>
+      </div>
+    </div>
+
+    <!-- COLUNA DIREITA: extrato + breakdown -->
+    <div>
+      <!-- Breakdown por categoria -->
+      ${Object.keys(byCat).length > 0 ? `
+      <div class="card" style="margin-bottom:1rem">
+        <div class="card-title" style="margin-bottom:.75rem">📊 Por categoria</div>
+        ${Object.entries(byCat).sort((a,b)=>b[1]-a[1]).map(([cat,val])=>{
+          const c = FIN_CATS[cat] || FIN_CATS.outros;
+          const pct = gastoVar > 0 ? Math.round(val/gastoVar*100) : 0;
+          return `<div style="margin-bottom:.6rem">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:.25rem">
+              <span style="font-size:13px;font-weight:600;color:#374151">${c.icon} ${c.label}</span>
+              <div style="display:flex;gap:.5rem;align-items:center">
+                <span style="font-size:11px;color:#9ca3af">${pct}%</span>
+                <span style="font-size:13px;font-weight:700;color:#ef4444">${finFmt(val)}</span>
+              </div>
+            </div>
+            <div class="progress-bar" style="height:6px">
+              <div class="progress-fill" style="background:${c.text};width:${pct}%"></div>
+            </div>
+          </div>`;
+        }).join('')}
+      </div>` : ''}
+
+      <!-- Extrato do mês -->
+      <div class="fin-extrato">
+        <div class="fin-extrato-title">
+          <span>🧾 Extrato do mês (${gastos.length})</span>
+          ${gastos.length > 0 ? `<span style="font-size:12px;color:#9ca3af">Total: <strong style="color:#ef4444">${finFmt(gastoVar)}</strong></span>` : ''}
+        </div>
+        ${gastos.length === 0
+          ? `<div class="fin-empty">Nenhum gasto registrado ainda.<br>Adicione seu primeiro gasto ao lado! 👈</div>`
+          : [...gastos].reverse().map(g => {
+              const c = FIN_CATS[g.cat] || FIN_CATS.outros;
+              return `<div class="fin-extrato-item">
+                <span style="font-size:18px">${c.icon}</span>
+                <div style="flex:1;min-width:0">
+                  <div class="fin-extrato-desc">${g.desc}</div>
+                  <div class="fin-extrato-date">${g.data} &nbsp;·&nbsp;
+                    <span class="fin-cat-badge" style="background:${c.bg};color:${c.text};border-color:${c.border}">${c.label}</span>
+                  </div>
+                </div>
+                <span class="fin-extrato-val">−${finFmt(g.valor)}</span>
+                <button class="fin-extrato-del" onclick="finDeleteGasto('${key}','${g.id}')" title="Excluir">✕</button>
+              </div>`;
+            }).join('')
+        }
+      </div>
+    </div>
+
+  </div>`;
+}
+
+// Renderiza sub-aba "Histórico"
+function finRenderHistorico(data, currentKey) {
+  const months = Object.keys(data)
+    .filter(k => k !== currentKey)
+    .sort((a, b) => b.localeCompare(a));
+
+  if (months.length === 0) {
+    return `<div class="card"><div class="fin-empty">Nenhum mês anterior encontrado.<br>O histórico aparecerá aqui a partir do próximo mês. 📅</div></div>`;
+  }
+
+  return `<div class="card">
+    <div class="card-title">📅 Histórico de meses anteriores</div>
+    ${months.map(key => {
+      const m = data[key];
+      const gastoVar = (m.gastos||[]).reduce((s,g)=>s+(parseFloat(g.valor)||0), 0);
+      const saldo = finSaldoLivre(m);
+      const pos = saldo >= 0;
+      return `<div class="fin-hist-item">
+        <div class="fin-hist-month">📆 ${finMonthLabel(key)}</div>
+        <div class="fin-hist-row"><span>Renda</span><span>${finFmt(m.renda)}</span></div>
+        <div class="fin-hist-row"><span>Investimentos</span><span>${finFmt(m.investimentos)}</span></div>
+        <div class="fin-hist-row"><span>Gastos Fixos</span><span>${finFmt(m.fixos)}</span></div>
+        <div class="fin-hist-row"><span>Gastos Variáveis (${(m.gastos||[]).length} itens)</span><span style="color:#ef4444">${finFmt(gastoVar)}</span></div>
+        <div style="margin-top:.35rem;padding-top:.35rem;border-top:1px solid #e5e7eb" class="fin-hist-row">
+          <span style="font-weight:700">Saldo final</span>
+          <span class="${pos?'fin-hist-saldo-pos':'fin-hist-saldo-neg'}" style="font-size:15px">
+            ${pos?'+':'−'}${finFmt(Math.abs(saldo))}
+          </span>
+        </div>
+      </div>`;
+    }).join('')}
+  </div>`;
+}
+
+// Alterna sub-aba
+function finSetTab(tab) {
+  finSubTab = tab;
+  renderFinancas();
+}
+
+// Salva configuração mensal (renda, investimentos, fixos)
+function finSalvarConfig() {
+  const renda  = parseFloat(document.getElementById('fin-renda').value)  || 0;
+  const invest = parseFloat(document.getElementById('fin-invest').value) || 0;
+  const fixos  = parseFloat(document.getElementById('fin-fixos').value)  || 0;
+
+  const data = finLoad();
+  const key  = finMonthKey();
+  finEnsureMonth(data, key);
+  data[key].renda        = renda;
+  data[key].investimentos = invest;
+  data[key].fixos        = fixos;
+  finSave(data);
+  renderFinancas();
+}
+
+// Adiciona gasto variável
+function finAddGasto(key) {
+  const desc = document.getElementById('fin-desc').value.trim();
+  const val  = parseFloat(document.getElementById('fin-val').value);
+  const cat  = document.getElementById('fin-cat').value;
+  const data_g = document.getElementById('fin-data').value;
+
+  if (!desc) { document.getElementById('fin-desc').focus(); return; }
+  if (!val || val <= 0) { document.getElementById('fin-val').focus(); return; }
+
+  const data = finLoad();
+  finEnsureMonth(data, key);
+  data[key].gastos.push({
+    id:    Date.now().toString(),
+    desc,
+    valor: val,
+    cat,
+    data:  data_g || new Date().toISOString().split('T')[0],
+  });
+  finSave(data);
+  renderFinancas();
+}
+
+// Exclui gasto variável
+function finDeleteGasto(key, id) {
+  const data = finLoad();
+  if (!data[key]) return;
+  data[key].gastos = data[key].gastos.filter(g => g.id !== id);
+  finSave(data);
+  renderFinancas();
+}
+
+// Hook: renderiza finanças quando a aba é ativada
+// (já integrado na função goTab existente via extensão abaixo)
+const _goTabOrig = window.goTab || function(){};
+window.goTab = function(tab) {
+  _goTabOrig(tab);
+  if (tab === 'financas') renderFinancas();
+};
+
+// ── FIM DO MÓDULO FINANÇAS ──────────────────────────────────
 </script>
 </body>
 </html>
